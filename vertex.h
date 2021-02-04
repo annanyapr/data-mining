@@ -15,8 +15,8 @@ class vertex
 
 vertex::vertex(int id, string nm)
 {
-    ID = id;
-    name = nm;
+    this->ID = id;
+    this->name = nm;
 }
 
 

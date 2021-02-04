@@ -1,5 +1,5 @@
 #include<bits/stdc++.h>
-#include<graph.h>
+#include"graph.h"
 #define CORE 0
 #define NON_MEMBER 1
 #define NON_CORE_MEMBER 2
@@ -14,7 +14,7 @@ public:
     float epsilon;
     int mu;
     graph* inputGraph;
-    scan(/* args */);
+    scan(float, int, graph*);
     float calculateSimilarity(vertex*, vertex*);
     vector<vertex*> getEpsilonNeighbourhood(vertex*);
     bool isCore(vertex*);
@@ -22,8 +22,11 @@ public:
     
 };
 
-scan::scan(/* args */)
+scan::scan(float ep,int mu, graph* inputGraph)
 {
+    epsilon = ep;
+    mu = mu;
+    inputGraph = inputGraph;
 }
 
 float scan::calculateSimilarity(vertex* v1, vertex* v2)
@@ -34,18 +37,30 @@ float scan::calculateSimilarity(vertex* v1, vertex* v2)
     set<vertex*> s1(neighbour1.begin(), neighbour1.end());
     s1.insert(v1);
 
-    set<vertex*> s2(neighbour2.begin(), neighbour2.end());
-    s2.insert(v2); 
+    neighbour2.push_back(v2);
 
-    set<int> intersect;
-    set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), inserter(intersect, intersect.begin()));
+    int count=0;
+    for(auto it=neighbour2.begin();it!=neighbour2.end();it++)
+    {
+        if(s1.find(*it)!=s1.end())
+        {
+            count++;
+        }
+    }
+    // set<vertex*> s2(neighbour2.begin(), neighbour2.end());
+    // s2.insert(v2); 
 
-    return (intersect.size()/(sqrt(s1.size()*s2.size())));
+
+    // vector<int> intersect;
+    // set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), back_inserter(intersect));
+
+    return (count)/(sqrt(s1.size()*neighbour2.size()));
 }
-
+// Should add v in epsilon neighbourhood also  
 vector<vertex*> scan::getEpsilonNeighbourhood(vertex* v)
 {
     vector<vertex*>ret;
+    ret.push_back(v);
     vector<vertex*>neighbour = inputGraph->graphObject[v];
 
     for (int i = 0; i < neighbour.size(); i++)
@@ -62,6 +77,7 @@ bool scan::isCore(vertex* v)
 {
     if(getEpsilonNeighbourhood(v).size()>=mu)
         return true;
+    else return false;
 }
 
 void scan::execute()
@@ -71,8 +87,6 @@ void scan::execute()
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++){
         sequence.push_back(iter->first);
     } 
-
-    vector<vector<vertex*>>clusters;
 
     for(int start = 0; start < sequence.size(); start++){
         if(sequence[start]->isClassified == 1){
@@ -85,31 +99,31 @@ void scan::execute()
             sequence[start]->memberType = CORE;
             sequence[start]->isClassified = 1;
             sequence[start]->clusterId = cluster_id;
-            vector<vertex*>temp = getEpsilonNeighbourhood(sequence[start]);
+            // vector<vertex*>temp = getEpsilonNeighbourhood(sequence[start]);
             queue<vertex*> q;
+            q.push(sequence[start]);
 
-            for (size_t i = 0; i < temp.size(); i++)
-            {
-                if(sequence[start] == temp[i]) continue;
-                q.push(temp[i]);
-            }
+            // for (size_t i = 0; i < temp.size(); i++)
+            // {
+            //     if(sequence[start] == temp[i]) continue;
+            //     q.push(temp[i]);
+            // }
             
             while (q.size() != 0){
                 vertex* temp_node = q.front();
                 q.pop();
 
-                if(temp_node->memberType != CORE){
-                    continue;
-                }
+                // if(temp_node->memberType != CORE){
+                //     continue;
+                // }
 
                 vector<vertex*> R = getEpsilonNeighbourhood(temp_node);
 
                 for(int index = 0; index < R.size(); index++){
 
-                    // Check this line if its needed
-                    if(temp_node == R[index]){
-                        continue;
-                    }
+                    // if(temp_node == R[index]){
+                    //     continue;
+                    // }
 
                     vertex* neighbour = R[index];
                     // If already a member of cluster, continue
@@ -119,26 +133,32 @@ void scan::execute()
 
                     // If already a non member dont push in queue as it is already a non core vertex
                     if(neighbour->memberType != NON_MEMBER){
-                        q.push(neighbour);
-                    }
+                        
 
+                        if(isCore(neighbour) == true){
+                            neighbour->memberType = CORE;
+                            q.push(neighbour);
+                        }
+                        else{
+                            neighbour->memberType = NON_CORE_MEMBER;
+                        }
 
-                    if(isCore(neighbour) == true){
-                        neighbour->memberType = CORE;
                     }
                     else{
-                        neighbour->memberType = NON_CORE_MEMBER;
+                        neighbour->memberType = NON_CORE_MEMBER;                        
                     }
 
-                    neighbour->clusterId = cluster_id;
 
+
+
+                    neighbour->clusterId = cluster_id;
                     neighbour->isClassified == 1;
                     cluster.push_back(neighbour);
 
 
                 }
             }
-            clusters.push_back(cluster);
+            inputGraph->clusters[cluster_id] = cluster;
             cluster_id++;
         }
         else{
@@ -155,38 +175,23 @@ void scan::execute()
     for(int start = 0; start < sequence.size(); start++){
         if(sequence[start]->memberType == NON_MEMBER){
             vector<vertex*> neighbours = inputGraph->graphObject[sequence[start]];
-            vector<int> cluster_ids;
-
+            unordered_set<int> cluster_ids;
+            
             for(int i = 0; i < neighbours.size(); i++){
                 if (neighbours[i]->memberType != NON_MEMBER)
-                    cluster_ids.push_back(neighbours[i]->clusterId);
+                    cluster_ids.insert(neighbours[i]->clusterId);
             }
 
-            if(cluster_ids.size() > 0){
-                int flag = 1;
-                for(int i = 1; i < cluster_ids.size(); i++){
-                    if(cluster_ids[i] == cluster_ids[i-1]){
-                        flag = 1;
-                    }
-                    else{
-                        flag = 0;
-                        break;
-                    }
-                }
 
-                if(flag == 0){
-                    sequence[start]->hub_or_outlier = HUB;
-                    inputGraph->hubs.push_back(sequence[start]);
-                }
-                else{
-                    sequence[start]->hub_or_outlier = OUTLIER;
-                    inputGraph->outliers.push_back(sequence[start]);
-                }
+            if (cluster_ids.size() >=  2){
+                sequence[start]->hub_or_outlier = HUB;
+                inputGraph->hubs.push_back(sequence[start]);
+
             }
             else{
                 sequence[start]->hub_or_outlier = OUTLIER;
                 inputGraph->outliers.push_back(sequence[start]);
-            }
+            } 
 
         }
     }
