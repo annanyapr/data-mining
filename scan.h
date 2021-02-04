@@ -1,3 +1,4 @@
+// SCAN Class
 #include<bits/stdc++.h>
 #include"graph.h"
 #define CORE 0
@@ -11,9 +12,9 @@ using namespace std;
 class scan
 {
 public:
-    float epsilon;
-    int mu;
-    graph* inputGraph;
+    float epsilon;  // epsilon parameter
+    int mu;  // mu parameter
+    graph* inputGraph; // graph to be analysed
     scan(float, int, graph*);
     float calculateSimilarity(vertex*, vertex*);
     vector<vertex*> getEpsilonNeighbourhood(vertex*);
@@ -22,13 +23,15 @@ public:
     
 };
 
+// constructor
 scan::scan(float ep,int mu, graph* inputGraph)
 {
-    epsilon = ep;
-    mu = mu;
-    inputGraph = inputGraph;
+    this->epsilon = ep;
+    this->mu = mu;
+    this->inputGraph = inputGraph;
 }
 
+// calculates similarity between two vertices
 float scan::calculateSimilarity(vertex* v1, vertex* v2)
 {
     vector<vertex*>neighbour1 = inputGraph->graphObject[v1];
@@ -47,16 +50,10 @@ float scan::calculateSimilarity(vertex* v1, vertex* v2)
             count++;
         }
     }
-    // set<vertex*> s2(neighbour2.begin(), neighbour2.end());
-    // s2.insert(v2); 
-
-
-    // vector<int> intersect;
-    // set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), back_inserter(intersect));
-
     return (count)/(sqrt(s1.size()*neighbour2.size()));
 }
-// Should add v in epsilon neighbourhood also  
+
+// calculates epsilon neighbourhood of a vertex
 vector<vertex*> scan::getEpsilonNeighbourhood(vertex* v)
 {
     vector<vertex*>ret;
@@ -73,6 +70,7 @@ vector<vertex*> scan::getEpsilonNeighbourhood(vertex* v)
     return ret;
 }
 
+// tells whether a vertex is core or not
 bool scan::isCore(vertex* v)
 {
     if(getEpsilonNeighbourhood(v).size()>=mu)
@@ -80,6 +78,8 @@ bool scan::isCore(vertex* v)
     else return false;
 }
 
+
+// creates clustering and classifies non member vertices as hubs or outliers
 void scan::execute()
 {
     int cluster_id  = 0;
@@ -88,53 +88,38 @@ void scan::execute()
         sequence.push_back(iter->first);
     } 
 
+    // starts iteration on all vertices
     for(int start = 0; start < sequence.size(); start++){
+        // if vertex already visited, continue
         if(sequence[start]->isClassified == 1){
             continue;
         }
 
+        // if vertex is core, use BFS to generate cluster
         if(isCore(sequence[start]) == 1){
             vector<vertex*> cluster;
             cluster.push_back(sequence[start]);
             sequence[start]->memberType = CORE;
             sequence[start]->isClassified = 1;
             sequence[start]->clusterId = cluster_id;
-            // vector<vertex*>temp = getEpsilonNeighbourhood(sequence[start]);
             queue<vertex*> q;
             q.push(sequence[start]);
 
-            // for (size_t i = 0; i < temp.size(); i++)
-            // {
-            //     if(sequence[start] == temp[i]) continue;
-            //     q.push(temp[i]);
-            // }
-            
-            while (q.size() != 0){
+            while (q.size() > 0){
                 vertex* temp_node = q.front();
                 q.pop();
-
-                // if(temp_node->memberType != CORE){
-                //     continue;
-                // }
-
-                vector<vertex*> R = getEpsilonNeighbourhood(temp_node);
+                vector<vertex*> R = getEpsilonNeighbourhood(temp_node);  // generate epsilon neighbourhood to push in the queue
 
                 for(int index = 0; index < R.size(); index++){
 
-                    // if(temp_node == R[index]){
-                    //     continue;
-                    // }
-
                     vertex* neighbour = R[index];
-                    // If already a member of cluster, continue
+                    // If node already a member of cluster, continue
                     if ((neighbour->isClassified == 1) && (neighbour->memberType != NON_MEMBER)){
                         continue;
                     }
 
-                    // If already a non member dont push in queue as it is already a non core vertex
+                    // If node already a non member, dont push in queue as it is already a non core vertex
                     if(neighbour->memberType != NON_MEMBER){
-                        
-
                         if(isCore(neighbour) == true){
                             neighbour->memberType = CORE;
                             q.push(neighbour);
@@ -142,26 +127,21 @@ void scan::execute()
                         else{
                             neighbour->memberType = NON_CORE_MEMBER;
                         }
-
                     }
                     else{
                         neighbour->memberType = NON_CORE_MEMBER;                        
                     }
 
-
-
-
                     neighbour->clusterId = cluster_id;
-                    neighbour->isClassified == 1;
+                    neighbour->isClassified = 1;
                     cluster.push_back(neighbour);
-
-
                 }
             }
             inputGraph->clusters[cluster_id] = cluster;
             cluster_id++;
+
         }
-        else{
+        else{  // label the vertex as a non_member
             sequence[start]->isClassified = 1;
             sequence[start]->memberType = NON_MEMBER;
         }
@@ -170,10 +150,8 @@ void scan::execute()
 
     
     // for each non_member vertex check whether its a hub or an outlier
-
-
     for(int start = 0; start < sequence.size(); start++){
-        if(sequence[start]->memberType == NON_MEMBER){
+        if(sequence[start]->memberType == NON_MEMBER){ 
             vector<vertex*> neighbours = inputGraph->graphObject[sequence[start]];
             unordered_set<int> cluster_ids;
             

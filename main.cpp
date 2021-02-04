@@ -4,21 +4,10 @@ using namespace std;
 
 int main()
 {
-    // vertex* v1 = new vertex(1, "1");
-    // vertex* v2 = new vertex(2, "2");
-    // vertex* v3 = new vertex(3, "3");
-    // vertex* v4 = new vertex(4, "4");
-    // vertex* v5 = new vertex(5, "5");
-    // vertex* v6 = new vertex(6, "6");
-    // vertex* v7 = new vertex(7, "7");
-    // vertex* v8 = new vertex(8, "8");
-    // vertex* v9 = new vertex(9, "9");
-    // vertex* v10 = new vertex(10, "10");
-    // vertex* v11 = new vertex(11, "11");
-    // vertex* v12 = new vertex(12, "12");
-    // vertex* v13 = new vertex(13, "13");
 
+    // Generate the graph
     graph *G = new graph();
+    G->addVertex(0, "0");
     G->addVertex(1, "1");
     G->addVertex(2, "2");
     G->addVertex(3, "3");
@@ -62,9 +51,11 @@ int main()
     G->addEdge(2,"2",1,"1");
 
     G->printGraph();
-    // scan *S = new scan(0.65, 2, G);
-    // S->execute();
 
-    // G->printClusters();
+    // create clusters and generates hubs and outliers
+    scan *S = new scan(0.7, 2, G);
+    S->execute();
+
+    G->printClusters();
     
 }
