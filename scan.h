@@ -3,6 +3,9 @@
 #define CORE 0
 #define NON_MEMBER 1
 #define NON_CORE_MEMBER 2
+#define HUB 0
+#define OUTLIER 1
+
 using namespace std;
 
 class scan
@@ -87,6 +90,7 @@ void scan::execute()
 
             for (size_t i = 0; i < temp.size(); i++)
             {
+                if(sequence[start] == temp[i]) continue;
                 q.push(temp[i]);
             }
             
@@ -94,47 +98,100 @@ void scan::execute()
                 vertex* temp_node = q.front();
                 q.pop();
 
-                if (temp_node->isClassified == 0){
-                    temp_node->isClassified = 1;
-                    cluster.push_back(temp_node);
-                }
-
-                if(isCore(temp_node) == false){
-                    temp_node->memberType = NON_CORE_MEMBER;
-                    temp_node->clusterId = cluster_id;
+                if(temp_node->memberType != CORE){
                     continue;
                 }
-                else{
-                    temp_node->memberType = CORE;
-                    temp_node->clusterId = cluster_id;
-                }
 
-                vector<vertex*> R = getEpsilonNeighbourhood(sequence[start]);
+                vector<vertex*> R = getEpsilonNeighbourhood(temp_node);
 
                 for(int index = 0; index < R.size(); index++){
-                    vertex* neighbour = R[index];
-                    if (neighbour->isClassified == true){
+
+                    // Check this line if its needed
+                    if(temp_node == R[index]){
                         continue;
                     }
-                    neighbour->isClassified == true;
-                    cluster.push_back(neighbour);
 
+                    vertex* neighbour = R[index];
+                    // If already a member of cluster, continue
+                    if ((neighbour->isClassified == 1) && (neighbour->memberType != NON_MEMBER)){
+                        continue;
+                    }
+
+                    // If already a non member dont push in queue as it is already a non core vertex
                     if(neighbour->memberType != NON_MEMBER){
                         q.push(neighbour);
                     }
 
 
+                    if(isCore(neighbour) == true){
+                        neighbour->memberType = CORE;
+                    }
+                    else{
+                        neighbour->memberType = NON_CORE_MEMBER;
+                    }
+
+                    neighbour->clusterId = cluster_id;
+
+                    neighbour->isClassified == 1;
+                    cluster.push_back(neighbour);
+
+
                 }
-
-
             }
             clusters.push_back(cluster);
+            cluster_id++;
         }
         else{
+            sequence[start]->isClassified = 1;
             sequence[start]->memberType = NON_MEMBER;
         }
 
     }
+
+    
+    // for each non_member vertex check whether its a hub or an outlier
+
+
+    for(int start = 0; start < sequence.size(); start++){
+        if(sequence[start]->memberType == NON_MEMBER){
+            vector<vertex*> neighbours = inputGraph->graphObject[sequence[start]];
+            vector<int> cluster_ids;
+
+            for(int i = 0; i < neighbours.size(); i++){
+                if (neighbours[i]->memberType != NON_MEMBER)
+                    cluster_ids.push_back(neighbours[i]->clusterId);
+            }
+
+            if(cluster_ids.size() > 0){
+                int flag = 1;
+                for(int i = 1; i < cluster_ids.size(); i++){
+                    if(cluster_ids[i] == cluster_ids[i-1]){
+                        flag = 1;
+                    }
+                    else{
+                        flag = 0;
+                        break;
+                    }
+                }
+
+                if(flag == 0){
+                    sequence[start]->hub_or_outlier = HUB;
+                    inputGraph->hubs.push_back(sequence[start]);
+                }
+                else{
+                    sequence[start]->hub_or_outlier = OUTLIER;
+                    inputGraph->outliers.push_back(sequence[start]);
+                }
+            }
+            else{
+                sequence[start]->hub_or_outlier = OUTLIER;
+                inputGraph->outliers.push_back(sequence[start]);
+            }
+
+        }
+    }
+
+
 
 }
 
