@@ -16,6 +16,7 @@ public:
     map<pair<int,string>,vertex*> vertexMap; // mapping from (vertex id, vertex name) to vertex pointer
     graph(/* args */);
     void addEdge(int Id1,string name1, int Id2, string name2);  // add edge to graph
+    void addDirectedEdge(int Id1,string name1, int Id2, string name2); // add directed edge to graph
     void addVertex(int Id, string name);  // add vertex to graph
     void printClusters();  // prints clusters
     void printGraph(); // prints graphs
@@ -38,6 +39,15 @@ void graph::addEdge(int Id1, string name1, int Id2, string name2)
     numofEdges++;
 }
 
+// Add edge v1 to v2
+// Used in GML format file
+void graph::addDirectedEdge(int Id1, string name1, int Id2, string name2)
+{
+    vertex* v1 = vertexMap[{Id1,name1}];
+    vertex* v2 = vertexMap[{Id2,name2}];
+    graphObject[v1].push_back(v2);
+    numofEdges++;
+}
 
 // add vertex to graph
 void graph::addVertex(int Id, string name)
@@ -84,6 +94,8 @@ void graph::printClusters()
 void graph::printGraph()
 {
     cout<<"GRAPH: ";
+    cout<<"Number of vertices: "<< numOfNodes<<endl;
+    cout<<"Number of edges: "<< numofEdges<<endl;
     for(auto it=graphObject.begin(); it!=graphObject.end();it++)
     {
         cout<<(it->first)->ID<<": ";
