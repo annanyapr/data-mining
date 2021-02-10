@@ -50,7 +50,7 @@ float scan::calculateSimilarity(vertex* v1, vertex* v2)
             count++;
         }
     }
-    return (count)/(sqrt(s1.size()*neighbour2.size()));
+    return ((float)count)/(sqrt(s1.size()*neighbour2.size()));
 }
 
 // calculates epsilon neighbourhood of a vertex
