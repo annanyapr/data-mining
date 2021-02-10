@@ -194,6 +194,7 @@ void create_network(NETWORK *network)
   // Determine whether the network is directed
 
   network->directed = is_directed();
+  // printf("%d", network->directed);
   // Count the vertices
 
   network->nvertices = count_vertices();
@@ -225,19 +226,20 @@ void create_network(NETWORK *network)
 
       ptr = (strstr(line,"label"));
       if (ptr!=NULL) {
-	start = strchr(line,'"');
-	if (start==NULL) {
-	  sscanf(ptr,"label %s",&label);
-	} else {
-	  stop = strchr(++start,'"');
-	  if (stop==NULL) length = strlen(line) - (start-line);
-	  else length = stop - start;
-	  strncpy(label,start,length);
-	  label[length] = '\0';
-	  network->vertex[i].label = (char*)malloc((length+1)*sizeof(char));
-	  strcpy(network->vertex[i].label,label);
-	}
+        start = strchr(line,'"');
+        if (start==NULL) {
+          sscanf(ptr,"label %s",&label);
+        } else {
+            stop = strchr(++start,'"');
+            if (stop==NULL) length = strlen(line) - (start-line);
+            else length = stop - start;
+            strncpy(label,start,length);
+            label[length] = '\0';
+            network->vertex[i].label = (char*)malloc((length+1)*sizeof(char));
+            strcpy(network->vertex[i].label,label);
+        }
       }
+
 
       // If we see a closing square bracket we are done
 

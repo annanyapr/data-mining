@@ -36,7 +36,7 @@ void graph::addEdge(int Id1, string name1, int Id2, string name2)
     vertex* v2 = vertexMap[{Id2,name2}];
     graphObject[v1].push_back(v2);
     graphObject[v2].push_back(v1);
-    numofEdges++;
+    // numofEdges++;
 }
 
 // Add edge v1 to v2
@@ -46,7 +46,7 @@ void graph::addDirectedEdge(int Id1, string name1, int Id2, string name2)
     vertex* v1 = vertexMap[{Id1,name1}];
     vertex* v2 = vertexMap[{Id2,name2}];
     graphObject[v1].push_back(v2);
-    numofEdges++;
+    // numofEdges++;
 }
 
 // add vertex to graph
