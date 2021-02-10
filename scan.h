@@ -119,7 +119,7 @@ void scan::execute()
                     }
 
                     // If node already a non member, dont push in queue as it is already a non core vertex
-                    if(neighbour->memberType != NON_MEMBER){
+                    if(neighbour->isClassified == 0){
                         if(isCore(neighbour) == true){
                             neighbour->memberType = CORE;
                             q.push(neighbour);

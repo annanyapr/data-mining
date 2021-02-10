@@ -74,11 +74,11 @@ int main(int argc, char* argv[])
         {
             int r = read_network(N, F);
             graph* G = new graph();
-            G->numOfNodes = N->nvertices;   // Number of vertices in graph
-
+            // G->numOfNodes = N->nvertices;   // Number of vertices in graph
             // First add all vertices then add edges
             for(int i=0;i<N->nvertices;i++)
             {
+                // cout<<"a"<<N->vertex[i].label<<endl;
                 G->addVertex(N->vertex[i].id, N->vertex[i].label);  // Add new vertex to graph with id and name
             }
 
@@ -96,12 +96,12 @@ int main(int argc, char* argv[])
                     G->addDirectedEdge(N->vertex[i].id, N->vertex[i].label, N->vertex[i].edge[j].target, find_label(N->vertex[i].edge[j].target, N));
                 }
             }
-            G->numofEdges = nEdges;
+            G->numofEdges = nEdges/2;
             G->printGraph();
 
             
             // create clusters and generates hubs and outliers
-            scan *S = new scan(0.7, 2, G);
+            scan *S = new scan(0.35, 2, G);
             S->execute();
 
             cout<<endl;
@@ -131,4 +131,52 @@ int main(int argc, char* argv[])
         }
     
     }
+    if (strcmp(argv[1], "--MATRIX") == 0)
+    {
+        // NETWORK* N = new NETWORK();
+        
+        ifstream F(argv[2]);
+        if (!F) perror ("Error opening file");
+        else
+        {
+            graph* G = new graph();
+            string line;
+            int nvertices = 0;
+            while(getline(F, line)){nvertices++;}
+            for(int i=0;i<nvertices;i++)
+            {
+                G->addVertex(i, "");
+                
+            }
+            cout<<G->numOfNodes<<endl;
+            F.clear();
+            F.seekg(0);
+            int temp;
+            int nEdges = 0;
+            for(int i=0;i<nvertices;i++)
+            {
+                for(int j=0;j<nvertices;j++)
+                {
+                    F>>temp;
+                    if(temp==1)
+                    {
+                        nEdges++;
+                        G->addDirectedEdge(i, "", j, "");
+                    }
+                }
+            }
+            G->numofEdges = nEdges/2;
+            G->printGraph();
+
+            // create clusters and generates hubs and outliers
+            scan *S = new scan(0.5, 2, G);
+            S->execute();
+            G->printClusters();
+        }
+    }
 }
+
+
+// 0.7, 2 in EXAMPLE dataset
+// Map -> unordered map
+// optimise
