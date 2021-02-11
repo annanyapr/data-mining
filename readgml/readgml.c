@@ -228,7 +228,7 @@ void create_network(NETWORK *network)
       if (ptr!=NULL) {
         start = strchr(line,'"');
         if (start==NULL) {
-          sscanf(ptr,"label %s",&label);
+          sscanf(ptr,"label %s",label);
         } else {
             stop = strchr(++start,'"');
             if (stop==NULL) length = strlen(line) - (start-line);
