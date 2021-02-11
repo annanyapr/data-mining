@@ -3,6 +3,54 @@
 #include "readgml/readgml.h"
 using namespace std;
 
+
+void read_vlues(map<int, string>& values, string filepath)
+{
+    ifstream F(filepath);
+    string line;
+    int i=-1;
+    while(getline(F, line))
+    {
+        if(line.find("value")!=string::npos)
+        {
+            i++;
+            string word;
+            stringstream ss(line);
+            bool temp = false;
+            while(ss>>word){if(temp){string s(1, word[1]);values[i] = s;}temp=true;}
+        }
+    }
+}
+
+void printClustersDEBUG(graph* G, map<int, string> &values)
+{
+    cout<<"CLUSTERS"<<endl;
+    for(auto it=G->clusters.begin(); it!=G->clusters.end();it++)
+    {
+        cout<<it->first<<": ";
+        vector<vertex*> temp = G->clusters[it->first];
+        for(int i=0;i<temp.size();i++)
+        {
+            cout<<temp[i]->ID<<" "<<(values[temp[i]->ID])<<", ";
+        }
+        cout<<endl;
+    }
+
+    cout<<"HUBS: ";
+    for(int i=0;i<G->hubs.size();i++)
+    {
+        cout<<G->hubs[i]->ID<<" "<<values[G->hubs[i]->ID]<<", ";
+    }
+    cout<<endl;
+
+    cout<<"OUTLIERS: ";
+    for(int i=0;i<G->outliers.size();i++)
+    {
+        cout<<G->outliers[i]->ID<<" "<<values[G->outliers[i]->ID]<<", ";
+    }
+    cout<<endl;
+}
+
 int main(int argc, char* argv[])
 {
     // hard coded graph reading
@@ -100,9 +148,14 @@ int main(int argc, char* argv[])
             G->printGraph();
 
             // create clusters and generates hubs and outliers
-            scan *S = new scan(0.35, 2, G);
+            scan *S = new scan(0.42, 2, G);
             S->execute();
-            G->printClusters();
+            // G->printClusters();
+
+            // DEBUGGING purposes
+            map<int, string> values;
+            read_vlues(values, argv[2]);
+            printClustersDEBUG(G, values);
         }
     
     }
@@ -155,3 +208,17 @@ int main(int argc, char* argv[])
 // 0.7, 2 in EXAMPLE dataset
 // Map -> unordered map
 // optimise
+
+// void read_vlues(map<int, string>* values, string filepath)
+// {
+//     ifstream F(filepath);
+//     string line;
+//     while(getline(F, line))
+//     {
+//         // char* ptr = strstr((char*)line, "value");
+//         if(line.find("value")!=string::npos)
+//         {
+//             cout<<line<<endl;
+//         }
+//     }
+// }
