@@ -147,6 +147,7 @@ int main(int argc, char* argv[])
             G->numofEdges = nEdges/2;
             G->printGraph();
 
+            
             // create clusters and generates hubs and outliers
             scan *S = new scan(0.42, 2, G);
             S->execute();
@@ -156,6 +157,31 @@ int main(int argc, char* argv[])
             map<int, string> values;
             read_vlues(values, argv[2]);
             printClustersDEBUG(G, values);
+
+            cout<<endl;
+            for(auto i: G->vertexMap)
+            {
+                cout<<i.first.first<<": ";
+                vector<vertex*> temp = S->getEpsilonNeighbourhood(i.second);
+                for(auto j: temp)
+                {
+                    cout<<j->ID<<" ";
+                }
+                cout<<endl;
+            }
+
+            cout<<endl;
+            for(auto i: G->vertexMap)
+            {
+                for(auto j: G->vertexMap)
+                {
+                    cout<<i.first.first<<" "<<j.first.first<<" :";
+                    cout<<S->calculateSimilarity(i.second,j.second)<<endl;
+                }
+                cout<<endl;
+            }
+
+            G->printClusters();
         }
     
     }

@@ -1,90 +1,75 @@
-Creator "Mark Newman on Wed Oct 18 16:42:04 2006"
 graph
 [
   directed 0
   node
   [
     id 0
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
-    id 1
-    label "The Exception to the Rulers"
-    value "l"
+    id 1`
+    label ""
   ]
   node
   [
     id 2
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 3
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 4
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 5
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 6
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 7
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 8
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 9
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 10
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 11
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 12
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   node
   [
     id 13
-    label "The Exception to the Rulers"
-    value "l"
+    label ""
   ]
   edge
   [
