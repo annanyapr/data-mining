@@ -5,7 +5,7 @@
 #define NON_MEMBER 1
 #define NON_CORE_MEMBER 2
 #define HUB 0
-#define OUTLIER 1
+#define OUTLIER 1 
 
 using namespace std;
 
@@ -20,6 +20,8 @@ public:
     vector<vertex*> getEpsilonNeighbourhood(vertex*);
     bool isCore(vertex*);
     void execute();
+    void intermediateOutput(vector<vertex*>, ofstream &, int);
+    void printEpsilonNeighbours(ofstream &);
     
 };
 
@@ -37,7 +39,7 @@ float scan::calculateSimilarity(vertex* v1, vertex* v2)
     vector<vertex*>neighbour1 = inputGraph->graphObject[v1];
     vector<vertex*>neighbour2 = inputGraph->graphObject[v2];
 
-    set<vertex*> s1(neighbour1.begin(), neighbour1.end());
+    unordered_set<vertex*> s1(neighbour1.begin(), neighbour1.end());
     s1.insert(v1);
 
     neighbour2.push_back(v2);
@@ -82,6 +84,11 @@ bool scan::isCore(vertex* v)
 // creates clustering and classifies non member vertices as hubs or outliers
 void scan::execute()
 {
+    ofstream outputFile;
+    outputFile.open("intermediate.txt", std::ofstream::out | std::ofstream::trunc);
+    printEpsilonNeighbours(outputFile);
+
+
     int cluster_id  = 0;
     vector<vertex*> sequence;
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++){
@@ -102,13 +109,17 @@ void scan::execute()
             sequence[start]->memberType = CORE;
             sequence[start]->isClassified = 1;
             sequence[start]->clusterId = cluster_id;
+
+            
             queue<vertex*> q;
             q.push(sequence[start]);
 
             while (q.size() > 0){
                 vertex* temp_node = q.front();
                 q.pop();
+                outputFile << "CORE " << temp_node->ID << " generates: ";
                 vector<vertex*> R = getEpsilonNeighbourhood(temp_node);  // generate epsilon neighbourhood to push in the queue
+                int flag = 1;
 
                 for(int index = 0; index < R.size(); index++){
 
@@ -123,22 +134,38 @@ void scan::execute()
                         if(isCore(neighbour) == true){
                             neighbour->memberType = CORE;
                             q.push(neighbour);
+                            outputFile << "(CORE MEMBER " <<  neighbour->ID <<  ") ";
                         }
                         else{
                             neighbour->memberType = NON_CORE_MEMBER;
+                            outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";
                         }
                     }
                     else{
-                        neighbour->memberType = NON_CORE_MEMBER;                        
+                        neighbour->memberType = NON_CORE_MEMBER;
+                        outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";                        
                     }
+
+                    flag = 0;
 
                     neighbour->clusterId = cluster_id;
                     neighbour->isClassified = 1;
                     cluster.push_back(neighbour);
+
                 }
+                if (flag){
+                    outputFile << "All nodes in the epsilon neighbourhood have already been classified";
+                }
+                outputFile<<endl;
             }
+
+            // Printing a cluster
+            intermediateOutput(cluster, outputFile, cluster_id);
             inputGraph->clusters[cluster_id] = cluster;
             cluster_id++;
+
+
+                    
 
         }
         else{  // label the vertex as a non_member
@@ -174,7 +201,42 @@ void scan::execute()
         }
     }
 
-
-
 }
 
+void scan::intermediateOutput(vector<vertex*> cluster, ofstream &outputFile, int cluster_id)
+{
+    outputFile<<"Finalised a Cluster with ID "<<cluster_id<<" : ";
+    for(int i=0;i<cluster.size();i++)
+    {
+        outputFile<<cluster[i]->ID<<" ";
+    }
+    outputFile<<endl<<"--------------------------------------------------"<<endl;
+    outputFile<<endl;
+}
+
+void scan::printEpsilonNeighbours(ofstream &outputFile)
+{
+    outputFile<<"-------------------------Epsilon neighbourboods-------------------------"<<endl;
+    outputFile<<"VERTEX ID: EPSILON NEIGHBOURS"<<endl;
+    unordered_map<vertex*,vector<vertex*>> go = inputGraph->graphObject;
+    vector<vertex*> vertices;
+    for(auto it=go.begin(); it!=go.end();it++)
+    {
+        vertices.push_back(it->first);
+    }   
+
+    sort(vertices.begin(), vertices.end(), comp);
+    for(int i=0;i<vertices.size();i++)
+    {
+        outputFile<<vertices[i]->ID<<": ";
+        vector<vertex*> temp = getEpsilonNeighbourhood(vertices[i]);
+        for(int i=0;i<temp.size();i++)
+        {
+            outputFile<<temp[i]->ID<<" ";
+        }
+        outputFile<<endl;
+    }
+
+    outputFile<<endl<<"-------------------------SCAN EXECUTION starts-------------------------"<<endl;
+
+}
