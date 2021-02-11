@@ -12,15 +12,34 @@ using namespace std;
 class scan
 {
 public:
-    float epsilon;  // epsilon parameter
-    int mu;  // mu parameter
-    graph* inputGraph; // graph to be analysed
+    // epsilon parameter 
+    float epsilon;  
+
+    // mu parameter
+    int mu;  
+
+    // graph to be analysed
+    graph* inputGraph; 
+
+    // Constructor
     scan(float, int, graph*);
+
+    // Calculates similarity between two vertices
     float calculateSimilarity(vertex*, vertex*);
+
+    // Returns epsilon neighbourhood of a neighbourhood
     vector<vertex*> getEpsilonNeighbourhood(vertex*);
+
+    // Checks if a vertex is core
     bool isCore(vertex*);
+
+    // Main clustering algorithm
     void execute();
-    void intermediateOutput(vector<vertex*>, ofstream &, int);
+
+    // Output formed cluster to intermediate file
+    void printClusterToFile(vector<vertex*>, ofstream &, int);
+
+    // Output epsilon neighbourhood of all vertices in intermediate file
     void printEpsilonNeighbours(ofstream &);
     
 };
@@ -129,18 +148,21 @@ void scan::execute()
                         continue;
                     }
 
-                    // If node already a non member, dont push in queue as it is already a non core vertex
+                    // If node not already classified then classify it as core or non-core member
                     if(neighbour->isClassified == 0){
+                        // Core
                         if(isCore(neighbour) == true){
                             neighbour->memberType = CORE;
                             q.push(neighbour);
                             outputFile << "(CORE MEMBER " <<  neighbour->ID <<  ") ";
                         }
+                        // Non-core member
                         else{
                             neighbour->memberType = NON_CORE_MEMBER;
                             outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";
                         }
                     }
+                    // If already classified then Non-core member
                     else{
                         neighbour->memberType = NON_CORE_MEMBER;
                         outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";                        
@@ -159,23 +181,20 @@ void scan::execute()
                 outputFile<<endl;
             }
 
-            // Printing a cluster
-            intermediateOutput(cluster, outputFile, cluster_id);
+            // Printing recently formed cluster to file
+            printClusterToFile(cluster, outputFile, cluster_id);
             inputGraph->clusters[cluster_id] = cluster;
-            cluster_id++;
-
-
-                    
+            cluster_id++;  
 
         }
-        else{  // label the vertex as a non_member
+        else{  
+            // label the vertex as a non_member
             sequence[start]->isClassified = 1;
             sequence[start]->memberType = NON_MEMBER;
         }
 
     }
 
-    
     // for each non_member vertex check whether its a hub or an outlier
     for(int start = 0; start < sequence.size(); start++){
         if(sequence[start]->memberType == NON_MEMBER){ 
@@ -187,11 +206,15 @@ void scan::execute()
                     cluster_ids.insert(neighbours[i]->clusterId);
             }
 
-
             if (cluster_ids.size() >=  2){
                 sequence[start]->hub_or_outlier = HUB;
                 inputGraph->hubs.push_back(sequence[start]);
-
+                outputFile<<"HUB: "<<sequence[start]->ID<<" is connected to clusters ";
+                for(auto it=cluster_ids.begin(); it!=cluster_ids.end();it++)
+                {
+                    outputFile<<*it<<" ";
+                }
+                outputFile<<endl;
             }
             else{
                 sequence[start]->hub_or_outlier = OUTLIER;
@@ -203,7 +226,8 @@ void scan::execute()
 
 }
 
-void scan::intermediateOutput(vector<vertex*> cluster, ofstream &outputFile, int cluster_id)
+// Output formed cluster to intermediate file
+void scan::printClusterToFile(vector<vertex*> cluster, ofstream &outputFile, int cluster_id)
 {
     outputFile<<"Finalised a Cluster with ID "<<cluster_id<<" : ";
     for(int i=0;i<cluster.size();i++)
@@ -214,6 +238,7 @@ void scan::intermediateOutput(vector<vertex*> cluster, ofstream &outputFile, int
     outputFile<<endl;
 }
 
+// Output epsilon neighbourhood of all vertices in intermediate file
 void scan::printEpsilonNeighbours(ofstream &outputFile)
 {
     outputFile<<"-------------------------Epsilon neighbourboods-------------------------"<<endl;

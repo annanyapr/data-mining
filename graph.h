@@ -7,29 +7,54 @@ class graph
 {
 
 public:
-    unordered_map<vertex*,vector<vertex*>> graphObject;  // stores the graph as a mapping from vertex pointer to vector of pointers to vertices
-    int numOfNodes=0;   // number of vertices
-    int numofEdges=0;   // number of edges
-    map<int,vector<vertex*>> clusters;  // stores the clusters as a mapping from clusterID to vector of pointers to vertices
-    vector<vertex*> hubs;   // stores the hubs
-    vector<vertex*> outliers; // stores the outliers
-    unordered_map<int,vertex*> vertexMap; // mapping from (vertex id, vertex name) to vertex pointer
-    graph(/* args */);
-    void addEdge(int Id1, int Id2);  // add edge to graph
-    void addDirectedEdge(int Id1, int Id2); // add directed edge to graph
-    void addVertex(int Id, string name);  // add vertex to graph
-    void printClusters();  // prints clusters
-    void printGraph(); // prints graphs
+    // stores the graph as a mapping from vertex pointer to vector of pointers to vertices
+    unordered_map<vertex*,vector<vertex*>> graphObject;  
+
+    // number of vertices
+    int numOfNodes=0; 
+
+    // number of edges
+    int numofEdges=0;   
+
+    // stores the clusters as a mapping from clusterID to vector of pointers to vertices
+    map<int,vector<vertex*>> clusters;  
+
+    // stores the hubs
+    vector<vertex*> hubs;   
+
+    // stores the outliers
+    vector<vertex*> outliers; 
+
+    // mapping from (vertex id) to vertex pointer
+    unordered_map<int,vertex*> vertexMap; 
+
+    // Constructor
+    graph();
+
+    // add edge to graph
+    void addEdge(int Id1, int Id2);  
+
+    // add directed edge to graph
+    void addDirectedEdge(int Id1, int Id2);
+
+    // add vertex to graph 
+    void addVertex(int Id, string name);
+
+    // prints clusters  
+    void printClusters();
+
+    // prints graphs  
+    void printGraph(); 
 };
 
 // contructor
-graph::graph(/* args */)
+graph::graph()
 {
     graphObject = unordered_map<vertex*, vector<vertex*>>();
 }
 
-
-// add edge to graph
+// add undirected edge to graph 
+// v1 to v2 and v2 to v1
 void graph::addEdge(int Id1, int Id2)
 {
     vertex* v1 = vertexMap[Id1];
@@ -38,8 +63,7 @@ void graph::addEdge(int Id1, int Id2)
     graphObject[v2].push_back(v1);
 }
 
-// Add edge v1 to v2
-// Used in GML format file
+// Add directed edge from v1 to v2
 void graph::addDirectedEdge(int Id1,  int Id2)
 {
     vertex* v1 = vertexMap[Id1];
@@ -57,14 +81,17 @@ void graph::addVertex(int Id, string name)
     numOfNodes++;
 }
 
+
+// Comparator to sort vertices in increasing order of their IDs
 bool comp(const vertex *v1,const vertex *v2)
 {
     return v1->ID < v2->ID;
 }
 
-// prints clusters, hubs, outliers after scan has been completed
+// prints clusters, hubs, outliers after scan has been completed its execution
 void graph::printClusters()
 {
+    // Print clusters
     cout<<"CLUSTERS"<<endl;
     for(auto it=clusters.begin(); it!=clusters.end();it++)
     {
@@ -78,6 +105,7 @@ void graph::printClusters()
         cout<<endl;
     }
 
+    // Print hubs
     vector<vertex*> temp = hubs;
     sort(temp.begin(), temp.end(), comp);
     cout<<"HUBS: ";
@@ -87,7 +115,7 @@ void graph::printClusters()
     }
     cout<<endl;
 
-
+    // Print outliers
     temp = outliers;
     sort(temp.begin(), temp.end(), comp);
     cout<<"OUTLIERS: ";
@@ -98,7 +126,7 @@ void graph::printClusters()
     cout<<endl;
 }
 
-// prints graphs
+// prints graph
 void graph::printGraph()
 {
     cout<<"GRAPH: ";
