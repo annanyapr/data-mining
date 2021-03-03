@@ -1,6 +1,6 @@
 #include<bits/stdc++.h>
 #include"scan.h"
-#include "readgml/readgml.h"
+#include "../readgml/readgml.h"
 
 using namespace std;
 
