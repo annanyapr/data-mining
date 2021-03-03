@@ -12,6 +12,17 @@
 
 using namespace std;
 
+// A hash function used to hash a pair of any kind 
+struct hash_pair { 
+    template <class T1, class T2> 
+    size_t operator()(const pair<T1, T2>& p) const
+    { 
+        auto hash1 = hash<T1>{}(p.first); 
+        auto hash2 = hash<T2>{}(p.second); 
+        return hash1 ^ hash2; 
+    } 
+};
+
 class iscan
 {
 public:
@@ -51,7 +62,7 @@ public:
 
     unordered_set<vertex*> getNuv(int Id1, int Id2);
 
-    set<pair<vertex*,vertex*>> getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv);
+    unordered_set<pair<vertex*,vertex*>,hash_pair> getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv);
 
     void updateEdge(int id1, int id2, bool isAdded);
 
@@ -309,7 +320,7 @@ unordered_set<vertex*> iscan::getNuv(int Id1, int Id2){
 }
 
 // TODO chage to unordered set
-set<pair<vertex*,vertex*>> iscan::getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv){
+unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv){
 
     vertex* v1 = inputGraph->vertexMap[Id1];
     vertex* v2 = inputGraph->vertexMap[Id2];
@@ -317,7 +328,7 @@ set<pair<vertex*,vertex*>> iscan::getRuv(int Id1, int Id2, unordered_set<vertex*
     vector<vertex*> neighbour1 = inputGraph->graphObject[v1];
     vector<vertex*> neighbour2 = inputGraph->graphObject[v2];
 
-    set<pair<vertex*, vertex*>> ret;
+    unordered_set<pair<vertex*,vertex*>,hash_pair> ret;
 
     for(auto it=neighbour1.begin();it!=neighbour1.end();it++)
     {
@@ -342,7 +353,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
 
     unordered_set<vertex*> Nuv = getNuv(id1,id2);
 
-    set<pair<vertex*,vertex*>> Ruv = getRuv(id1, id2, Nuv);
+    unordered_set<pair<vertex*,vertex*>,hash_pair> Ruv = getRuv(id1, id2, Nuv);
 
     map<pair<vertex*,vertex*>,int> sigmaOld;
 
@@ -440,5 +451,5 @@ TODO:
 
 1. Reasssigning clusterid after split cluster
 2. Storing all similariy values
-3. set --> Unorderd_set
+3. set --> Unorderd_set in BFSTree
 */
