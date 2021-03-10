@@ -123,6 +123,7 @@ void bfsTree::merge(vertex* v1, vertex* v2)
 
 void bfsTree::recurseChildren(vertex* v, int clusterId)
 {
+    // cout<<"child:"<<v->ID<<endl;
     queue<vertex* > q;
     for(auto it=v->children.begin(); it!=v->children.end();it++)
     {
@@ -130,7 +131,10 @@ void bfsTree::recurseChildren(vertex* v, int clusterId)
     }
     while(!q.empty())
     {
+        
         vertex* temp = q.front();
+        // cout <<"Arput:"<< temp->ID;
+        q.pop();
         temp->clusterId = clusterId;
         for(auto it=temp->children.begin(); it!=temp->children.end();it++)
         {
@@ -141,6 +145,7 @@ void bfsTree::recurseChildren(vertex* v, int clusterId)
 
 void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
 {
+    // cout<<u->ID<<endl;
     if(parent == NULL)
     {
         return;

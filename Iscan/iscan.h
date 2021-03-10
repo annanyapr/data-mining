@@ -74,6 +74,7 @@ iscan::iscan(float ep,int mu, graph* inputGraph)
     this->epsilon = ep;
     this->mu = mu;
     this->inputGraph = inputGraph;
+    this->bfsTreeObject = new bfsTree();
 }
 
 
@@ -88,6 +89,7 @@ float iscan::getSimilarity(vertex* v1, vertex* v2)
     }
     else{
         epsilon_values[{v2,v1}] = calculateSimilarity(v1,v2);
+        return epsilon_values[{v2,v1}];
     }
 
 }
@@ -370,8 +372,7 @@ void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> v
         else{
             epsilon_values.erase({i.second,i.first});
         }
-        epsilon_values[i] = calculateSimilarity(i.first,i.second);
-        
+        epsilon_values[i] = calculateSimilarity(i.first,i.second);   
     }
 }
 
@@ -502,6 +503,7 @@ void iscan::mergeCluster(vertex* w){
     }
 
     for(auto u: getEpsilonNeighbourhood(w)){
+        if(u == w) continue;
         if(u->memberType != 1){
             if(u->memberType == 2){
                 if(((u->clusterId == w->clusterId) && (u->parent != w)) || (u->clusterId != w->clusterId)){
@@ -519,6 +521,7 @@ void iscan::mergeCluster(vertex* w){
                         bfsTreeObject->merge(u, w);
                     }
                     else{
+                        inputGraph->printVertices();
                         bfsTreeObject->merge(w, u);
                     }
                 }                    

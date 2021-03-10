@@ -52,7 +52,26 @@ class graph
 
         // prints graphs  
         void printGraph(); 
+
+        void printVertices();
 };
+
+
+void graph::printVertices(){
+    for(auto it:vertexMap)
+    {
+        cout<<(it.second)->ID<<" ";
+        if((it.second)->parent != NULL)
+        {
+            cout<<(it.second)->parent->ID<<" children:";
+        }
+        for (auto child:(it.second)->children)
+        {
+            cout<<child->ID<<" ";
+        }
+        cout<<endl;
+    }
+}
 
 // contructor
 graph::graph()

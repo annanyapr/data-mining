@@ -45,8 +45,22 @@ int main(int argc, char* argv[])
             if(stoi(argv[4])<=0){cout<<"Mu value should be greater than 0"<<endl;exit(0);}
 
             // create clusters and generates hubs and outliers
-            scan *S = new scan(stof(argv[3]), stoi(argv[4]), G);
-            S->execute();
+            iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
+            IS->executeSCAN();
+            G->printClusters();
+
+            cout<<"Initial clustering done."<<endl;
+            cout<<"Number of edges to add/delete:"<<endl;
+            
+            int numupdates, update, src, dest;
+            cin>>numupdates;
+            for(int i=0;i<numupdates;i++)
+            {
+                cin>>update>>src>>dest;
+                IS->updateEdge(src, dest, update);   
+                G->printVertices();
+            }
+
             G->printClusters();
 
         }
@@ -97,8 +111,8 @@ int main(int argc, char* argv[])
             if(stof(argv[3])>1 || stof(argv[3])<=0){cout<<"Epsilon value should be between 0 and 1"<<endl;exit(0);}
             if(stoi(argv[4])<=0){cout<<"Mu value should be greater than 0"<<endl;exit(0);}
             
-            scan *S = new scan(stof(argv[3]), stoi(argv[4]), G);
-            S->execute();
+            iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
+            IS->executeSCAN();
             G->printClusters();
         }
     }
