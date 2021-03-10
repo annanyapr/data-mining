@@ -68,7 +68,7 @@ public:
 
     void mergeCluster(vertex* v);
 
-    void splitCluster(vertex* v1, vertex* v2);
+    void splitCluster(vertex* v1, vertex* v2, unordered_set<vertex*>& old_cores);
     
 };
 
@@ -356,6 +356,15 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     unordered_set<pair<vertex*,vertex*>,hash_pair> Ruv = getRuv(id1, id2, Nuv);
 
     map<pair<vertex*,vertex*>,int> sigmaOld;
+    
+    unordered_set<vertex*> old_cores;
+
+    for(auto it: Nuv){
+        if (isCore(it)){
+            old_cores.insert(it);
+        }
+    }
+
 
     for(auto it: Ruv)
     {
@@ -382,8 +391,25 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     for(auto it:Ruv)
     {
         if(sigmaOld[it]>= epsilon && calculateSimilarity(it.first,it.second)<epsilon)
-            splitCluster(it.first,it.second);
-    }    
+            splitCluster(it.first,it.second, old_cores);
+    }
+
+// Removed Cluster Ids of all vertices
+    for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.begin(); iter++){
+        iter->first->clusterId = -1;
+    }
+
+// Reassigned Cluster Ids
+    int tempId = 0;
+    for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.begin(); iter++){
+        if(iter->first->clusterId == -1){
+            bfsTreeObject->recurseParent(iter->first, iter->first->parent, tempId);
+            bfsTreeObject->recurseChildren(iter->first, tempId);
+            tempId++;
+        }
+    }
+    
+
 
     for(auto it:bfsTreeObject->phi)
     {
@@ -438,11 +464,98 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     }
 }
 
-void iscan::mergeCluster(vertex* v){
+void iscan::mergeCluster(vertex* w){
+
+    if (w->memberType == 1){
+        int newClusterID = (1+inputGraph->clusters.rbegin()->first);
+        w->clusterId = newClusterID;
+        inputGraph->clusters[newClusterID] = {w}; 
+    }
+
+    for(auto u: getEpsilonNeighbourhood(w)){
+        if(u->memberType != 1){
+            if(u->memberType == 2){
+                if(((u->clusterId == w->clusterId) && (u->parent != w)) || (u->clusterId != w->clusterId)){
+                    bfsTreeObject->addEdgeToPhi(u, w);
+                }
+            }
+            else{
+                if((u->clusterId == w->clusterId) && (u->parent != w) && (w->parent != u)){
+                    bfsTreeObject->addEdgeToPhi(u, w);
+                }
+                if(u->clusterId != w->clusterId){
+
+                    if(inputGraph->clusters[u->clusterId].size() < inputGraph->clusters[w->clusterId].size()){
+
+                        bfsTreeObject->merge(u, w);
+                    }
+                    else{
+                        bfsTreeObject->merge(w, u);
+                    }
+                }                    
+            }
+        }
+        else{
+            u->clusterId = w->clusterId;
+            u->parent = w;
+            bfsTreeObject->addEdgeToBfsSet(w, u);
+        }
+    }
 
 }
 
-void iscan::splitCluster(vertex* v1, vertex* v2){
+void iscan::splitCluster(vertex* u, vertex* v, unordered_set<vertex*>& old_cores){
+
+    if((u->memberType == 0) && (v->memberType == 0)){
+        if((u->parent != v) && (v->parent != u)){
+            bfsTreeObject->removeEdgeFromPhi(u, v);
+        }
+        else{
+            bfsTreeObject->removeEdgeFromBfsSet(u, v);
+        }
+    }
+
+    if((u->memberType == 0) && (v->memberType != 0)){
+        if (v->parent == u){
+            bfsTreeObject->removeEdgeFromBfsSet(u, v);
+        }
+        else{
+            bfsTreeObject->removeEdgeFromPhi(u, v);
+        }
+    }
+
+
+    if((v->memberType == 0) && (u->memberType != 0)){
+        if (u->parent == v){
+            bfsTreeObject->removeEdgeFromBfsSet(u, v);
+        }
+        else{
+            bfsTreeObject->removeEdgeFromPhi(u, v);
+        }
+    }
+
+    if((u->memberType != 0) && (v->memberType != 0)){
+        if(old_cores.find(u) != old_cores.end()){
+            if (v->parent == u){
+                bfsTreeObject->removeEdgeFromBfsSet(u, v);
+            }
+            else{
+                bfsTreeObject->removeEdgeFromPhi(u, v);
+            }
+        }
+
+        if(old_cores.find(v) != old_cores.end()){
+            if (u->parent == v){
+                bfsTreeObject->removeEdgeFromBfsSet(u, v);
+            }
+            else{
+                bfsTreeObject->removeEdgeFromPhi(u, v);
+            }
+        }
+
+    }
+
+
 
 }
 

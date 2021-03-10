@@ -15,7 +15,7 @@ class vertex
         int memberType=-1;   // 0 is core, 1 is Non Member, 2 is Non Core Member
         int clusterId = -1;  // cluster id
         int hub_or_outlier = -1; // hub is 0, outlier is 1
-        vertex * parent;
+        vertex * parent = NULL;
         unordered_set<vertex*> children;
         vertex(int id, string nm);
 };

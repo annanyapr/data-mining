@@ -150,7 +150,11 @@ void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
     for(auto it = parent->children.begin(); it!=parent->children.end();it++)
     {
         (*it)->clusterId = clusterId;
-        recurseChildren(*it, clusterId);
+
+        if(*it != u){
+            recurseChildren(*it, clusterId);
+        }
+
     }
     recurseParent(parent, parent->parent, clusterId);
 }
