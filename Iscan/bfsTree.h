@@ -6,9 +6,9 @@ class bfsTree
 {
     public:
         
-        unordered_set<pair<vertex*, vertex*>> phi;
+        unordered_set<pair<vertex*, vertex*>,hash_pair> phi;
 
-        unordered_set<pair<vertex*, vertex*>> bfsSet;
+        unordered_set<pair<vertex*, vertex*>,hash_pair> bfsSet;
 
         void addEdgeToPhi(vertex* v1, vertex* v2);
 

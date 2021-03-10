@@ -12,16 +12,7 @@
 
 using namespace std;
 
-// A hash function used to hash a pair of any kind 
-struct hash_pair { 
-    template <class T1, class T2> 
-    size_t operator()(const pair<T1, T2>& p) const
-    { 
-        auto hash1 = hash<T1>{}(p.first); 
-        auto hash2 = hash<T2>{}(p.second); 
-        return hash1 ^ hash2; 
-    } 
-};
+
 
 class iscan
 {
@@ -41,7 +32,10 @@ public:
     iscan(float, int, graph*);
 
     // Calculates similarity between two vertices
+    float getSimilarity(vertex*, vertex*);
     float calculateSimilarity(vertex*, vertex*);
+
+    void updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> vertices);
 
     // Returns epsilon neighbourhood of a neighbourhood
     vector<vertex*> getEpsilonNeighbourhood(vertex*);
@@ -62,6 +56,8 @@ public:
 
     unordered_set<vertex*> getNuv(int Id1, int Id2);
 
+    unordered_map<pair<vertex*,vertex*>,float,hash_pair> epsilon_values;
+
     unordered_set<pair<vertex*,vertex*>,hash_pair> getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv);
 
     void updateEdge(int id1, int id2, bool isAdded);
@@ -80,7 +76,22 @@ iscan::iscan(float ep,int mu, graph* inputGraph)
     this->inputGraph = inputGraph;
 }
 
+
 // calculates similarity between two vertices
+float iscan::getSimilarity(vertex* v1, vertex* v2)
+{
+    if(epsilon_values.find({v1,v2})!=epsilon_values.end()){
+        return epsilon_values[{v1,v2}];
+    }
+    else if(epsilon_values.find({v2,v1})!=epsilon_values.end()){
+        return epsilon_values[{v2,v1}];
+    }
+    else{
+        epsilon_values[{v2,v1}] = calculateSimilarity(v1,v2);
+    }
+
+}
+
 float iscan::calculateSimilarity(vertex* v1, vertex* v2)
 {
     vector<vertex*>neighbour1 = inputGraph->graphObject[v1];
@@ -102,6 +113,7 @@ float iscan::calculateSimilarity(vertex* v1, vertex* v2)
     return ((float)count)/(sqrt(s1.size()*neighbour2.size()));
 }
 
+
 // calculates epsilon neighbourhood of a vertex
 vector<vertex*> iscan::getEpsilonNeighbourhood(vertex* v)
 {
@@ -111,7 +123,7 @@ vector<vertex*> iscan::getEpsilonNeighbourhood(vertex* v)
 
     for (int i = 0; i < neighbour.size(); i++)
     {
-        if(calculateSimilarity(v,neighbour[i])>=epsilon)
+        if(getSimilarity(v,neighbour[i])>=epsilon)
         {
             ret.push_back(neighbour[i]);
         }
@@ -348,6 +360,22 @@ unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, u
     return ret;
 }
 
+void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> vertices)
+{
+    for( auto i : vertices)
+    {
+        if(epsilon_values.find(i)!=epsilon_values.end()){
+            epsilon_values.erase(i);
+        }
+        else{
+            epsilon_values.erase({i.second,i.first});
+        }
+        epsilon_values[i] = calculateSimilarity(i.first,i.second);
+        
+    }
+}
+
+
 void iscan::updateEdge(int id1, int id2, bool isAdded){
     
 
@@ -368,7 +396,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
 
     for(auto it: Ruv)
     {
-        sigmaOld[it] = calculateSimilarity(it.first,it.second);
+        sigmaOld[it] = getSimilarity(it.first,it.second);
     }
     
     if(isAdded)
@@ -380,6 +408,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
         inputGraph->removeEdge(id1,id2);
     }
 
+    updateRuvSimilarity(Ruv);
     for(auto it:Nuv)
     {
         if(isCore(it))
@@ -390,7 +419,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
 
     for(auto it:Ruv)
     {
-        if(sigmaOld[it]>= epsilon && calculateSimilarity(it.first,it.second)<epsilon)
+        if(sigmaOld[it]>= epsilon && getSimilarity(it.first,it.second)<epsilon)
             splitCluster(it.first,it.second, old_cores);
     }
 
@@ -564,5 +593,4 @@ TODO:
 
 1. Reasssigning clusterid after split cluster
 2. Storing all similariy values
-3. set --> Unorderd_set in BFSTree
 */
