@@ -65,6 +65,7 @@ void graph::printVertices(){
         {
             cout<<(it.second)->parent->ID<<" children:";
         }
+        else cout<<" children:";
         for (auto child:(it.second)->children)
         {
             cout<<child->ID<<" ";

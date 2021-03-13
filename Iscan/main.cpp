@@ -48,6 +48,8 @@ int main(int argc, char* argv[])
             iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
             IS->executeSCAN();
             G->printClusters();
+            cout<<"Verteices information"<<endl;
+            G->printVertices();
 
             cout<<"Initial clustering done."<<endl;
             cout<<"Number of edges to add/delete:"<<endl;
@@ -56,9 +58,10 @@ int main(int argc, char* argv[])
             cin>>numupdates;
             for(int i=0;i<numupdates;i++)
             {
+                // Check if vertex exists or not and same for edge
                 cin>>update>>src>>dest;
                 IS->updateEdge(src, dest, update);   
-                G->printVertices();
+                // G->printVertices();
             }
 
             G->printClusters();

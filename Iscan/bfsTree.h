@@ -27,6 +27,8 @@ class bfsTree
         void recurseChildren(vertex* v, int clusterId);
 
         void recurseParent(vertex* u, vertex* parent, int clusterId);
+
+        bfsTree();
 };
 
 
@@ -123,6 +125,10 @@ void bfsTree::merge(vertex* v1, vertex* v2)
 
 void bfsTree::recurseChildren(vertex* v, int clusterId)
 {
+    // --------------DOUBT
+    // Should also change v's clusterID
+    v->clusterId = clusterId;
+    
     // cout<<"child:"<<v->ID<<endl;
     queue<vertex* > q;
     for(auto it=v->children.begin(); it!=v->children.end();it++)
@@ -162,4 +168,9 @@ void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
 
     }
     recurseParent(parent, parent->parent, clusterId);
+}
+
+bfsTree::bfsTree()
+{
+    this->phi.clear();
 }
