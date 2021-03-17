@@ -70,7 +70,8 @@ void graph::printVertices(){
         {
             cout<<child->ID<<" ";
         }
-        cout<<endl;
+        cout<<" ClusterID:  "<<(it.second)->clusterId;
+         cout<<endl;
     }
 }
 
