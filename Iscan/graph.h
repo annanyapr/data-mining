@@ -217,7 +217,7 @@ void graph::removeEdge(int Id1,int Id2)
 
         graphObject[v2].erase(graphObject[v2].begin()+i);
 
-        numofEdges--;
+        // numofEdges--;
     }
 }
 

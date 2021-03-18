@@ -134,9 +134,15 @@ vector<vertex*> iscan::getEpsilonNeighbourhood(vertex* v)
 // tells whether a vertex is core or not
 bool iscan::isCore(vertex* v)
 {
-    if(getEpsilonNeighbourhood(v).size()>=mu)
+    // cout<<"iscore: "<<v->ID;
+    if(getEpsilonNeighbourhood(v).size()>=mu){
+        // cout<<" yes\n";
         return true;
-    else return false;
+    }
+    else {
+        // cout<<" no\n";
+        return false;
+    }
 }
 
 
@@ -155,9 +161,9 @@ void iscan::executeSCAN()
         }
     }
 
-    ofstream outputFile;
-    outputFile.open("intermediate.txt", std::ofstream::out | std::ofstream::trunc);
-    printEpsilonNeighbours(outputFile);
+    // ofstream outputFile;
+    // outputFile.open("intermediate.txt", std::ofstream::out | std::ofstream::trunc);
+    // printEpsilonNeighbours(outputFile);
 
 
     int cluster_id  = 0;
@@ -188,7 +194,7 @@ void iscan::executeSCAN()
             while (q.size() > 0){
                 vertex* temp_node = q.front();
                 q.pop();
-                outputFile << "CORE " << temp_node->ID << " generates: ";
+                // outputFile << "CORE " << temp_node->ID << " generates: ";
                 vector<vertex*> R = getEpsilonNeighbourhood(temp_node);  // generate epsilon neighbourhood to push in the queue
 
                 int flag = 1;
@@ -214,7 +220,7 @@ void iscan::executeSCAN()
                             }
                             
                         }
-                        cout<<"executeSCAN:"<<neighbour->ID<<" "<<temp_node->ID<<endl;
+                        // cout<<"executeSCAN:"<<neighbour->ID<<" "<<temp_node->ID<<endl;
                         continue;
                     }
 
@@ -230,7 +236,7 @@ void iscan::executeSCAN()
                                 bfsTreeObject->addEdgeToBfsSet(temp_node, neighbour);
                             }
                             
-                            outputFile << "(CORE MEMBER " <<  neighbour->ID <<  ") ";
+                            // outputFile << "(CORE MEMBER " <<  neighbour->ID <<  ") ";
                         }
                         // Non-core member
                         else{
@@ -241,7 +247,7 @@ void iscan::executeSCAN()
                                 bfsTreeObject->addEdgeToBfsSet(temp_node, neighbour);
                             }
                             
-                            outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";
+                            // outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";
                         }
                     }
                     // If already classified then Non-core member
@@ -254,7 +260,7 @@ void iscan::executeSCAN()
                             bfsTreeObject->addEdgeToPhi(temp_node, neighbour);
                         }
                         
-                        outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";  
+                        // outputFile << "(NON CORE MEMBER " <<  neighbour->ID <<  ") ";  
 
                                               
                     }
@@ -270,13 +276,13 @@ void iscan::executeSCAN()
 
                 }
                 if (flag){
-                    outputFile << "All nodes in the epsilon neighbourhood have already been classified";
+                    // outputFile << "All nodes in the epsilon neighbourhood have already been classified";
                 }
-                outputFile<<endl;
+                // outputFile<<endl;
             }
 
             // Printing recently formed cluster to file
-            printClusterToFile(cluster, outputFile, cluster_id);
+            // printClusterToFile(cluster, outputFile, cluster_id);
             inputGraph->clusters[cluster_id] = cluster;
             cluster_id++;  
 
@@ -303,12 +309,12 @@ void iscan::executeSCAN()
             if (cluster_ids.size() >=  2){
                 sequence[start]->hub_or_outlier = HUB;
                 inputGraph->hubs.push_back(sequence[start]);
-                outputFile<<"HUB: "<<sequence[start]->ID<<" is connected to clusters ";
-                for(auto it=cluster_ids.begin(); it!=cluster_ids.end();it++)
-                {
-                    outputFile<<*it<<" ";
-                }
-                outputFile<<endl;
+                // outputFile<<"HUB: "<<sequence[start]->ID<<" is connected to clusters ";
+                // for(auto it=cluster_ids.begin(); it!=cluster_ids.end();it++)
+                // {
+                //     // outputFile<<*it<<" ";
+                // }
+                // outputFile<<endl;
             }
             else{
                 sequence[start]->hub_or_outlier = OUTLIER;
@@ -318,9 +324,9 @@ void iscan::executeSCAN()
         }
     }
 
-    cout<<"After Execute SCAN:"<<endl;
-    bfsTreeObject->printBfsSet();
-    bfsTreeObject->printPhiSet();
+    // cout<<"After Execute SCAN:"<<endl;
+    // bfsTreeObject->printBfsSet();
+    // bfsTreeObject->printPhiSet();
 
 }
 
@@ -411,6 +417,9 @@ unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, u
         }
     }
     ret.erase({v1, v2});
+    ret.erase({v2, v1});
+    ret.insert({v1,v2});
+
     return ret;
 }
 
@@ -418,7 +427,8 @@ void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> e
 {
     for( auto i : edges)
     {
-        // if(epsilon_values.find(i)!=epsilon_values.end()){
+        // cout<<"updating: "<<i.first->ID<<" "<<i.second->ID<<endl;
+                 // if(epsilon_values.find(i)!=epsilon_values.end()){
         //     epsilon_values.erase(i);
         // }
         // else{
@@ -431,6 +441,7 @@ void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> e
 
 
 void iscan::updateEdge(int id1, int id2, bool isAdded){
+    inputGraph->printVertices();
     
     // cout<<"Before Update edge:"<<endl;
     // for(auto it:bfsTreeObject->phi)
@@ -447,6 +458,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     unordered_set<vertex*> old_cores;
 
     for(auto it: Nuv){
+        
         if (isCore(it)){
             old_cores.insert(it);
         }
@@ -469,31 +481,45 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
         epsilon_values.erase({inputGraph->vertexMap[id2], inputGraph->vertexMap[id1]});
         inputGraph->removeEdge(id1,id2);
     }
-
+    // inputGraph->printGraph();
 
 
     updateRuvSimilarity(Ruv);
+    // cout<<"Similarity Values:"<<endl;
+    // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
+    // {
+    //     for(auto it = iter->second.begin(); it!=iter->second.end();it++)
+    //     {
+    //         float sim = getSimilarity(iter->first, *it);
+            // cout<<iter->first->ID<<" "<<(*it)->ID<<" "<<sim<<endl;
+
+    //     }
+    // }
+
     for(auto it:Nuv)
     {
+        // cout<<"checking.. "<<it->ID<<endl;
         if(isCore(it))
         {
             mergeCluster(it);
+    // inputGraph->printVertices();
         }
     }
 
 
-    // cout<<"After mergeCluster:"<<endl;
+    cout<<"After mergeCluster:"<<endl;
+    inputGraph->printVertices();
     // for(auto it:bfsTreeObject->phi)
     // {
     //     cout<<it.first->ID<<" "<<it.second->ID<<endl;
     // }
 
-    bfsTreeObject->printBfsSet();
-    bfsTreeObject->printPhiSet();
+    // bfsTreeObject->printBfsSet();
+    // bfsTreeObject->printPhiSet();
 
     for(auto it:Ruv)
     {
-        cout<<(it.first)->ID<<" "<<(it.second)->ID<<" "<<sigmaOld[it]<<" "<<getSimilarity(it.first,it.second)<<endl;
+        // cout<<(it.first)->ID<<" "<<(it.second)->ID<<" "<<sigmaOld[it]<<" "<<getSimilarity(it.first,it.second)<<endl;
         if(sigmaOld[it]>= epsilon && getSimilarity(it.first,it.second)<epsilon)
             splitCluster(it.first,it.second, old_cores);
     }
@@ -505,8 +531,8 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     // }
     cout<<"After Split"<<endl;
     inputGraph->printVertices();
-    bfsTreeObject->printBfsSet();
-    bfsTreeObject->printPhiSet();
+    // bfsTreeObject->printBfsSet();
+    // bfsTreeObject->printPhiSet();
     // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     // {
     //     cout<<iter->first->clusterId<<", ";
@@ -520,29 +546,35 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     }
 
 // Reassigned Cluster Ids
-    cout<<"before cluste bakchodi: \n";
+    // cout<<"before cluste bakchodi: \n";
     inputGraph->printVertices();
 
     int tempId = 0;
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++){
         if(iter->first->clusterId == -1 && (iter->first->parent != NULL || !(iter->first->children.empty()))){
-            cout<<iter->first->ID<<endl;
+            cout<<"re bfs stuff: "<<iter->first->ID<<endl;
+            // inputGraph->printVertices();
+            // cout<<"recurse parests "<<endl;
             bfsTreeObject->recurseParent(iter->first, iter->first->parent, tempId);
+            // inputGraph->printVertices();
+            // cout<<"recurse childeresnnn "<<endl;
             bfsTreeObject->recurseChildren(iter->first, tempId);
-            for(auto iter2 = inputGraph->graphObject.begin(); iter2 != inputGraph->graphObject.end(); iter2++)
-            {
-                cout<<iter2->first->clusterId<<", ";
-            }
-            cout<<endl;
+            // for(auto iter2 = inputGraph->graphObject.begin(); iter2 != inputGraph->graphObject.end(); iter2++)
+            // {
+            //     cout<<iter2->first->clusterId<<", ";
+            // }
+            // cout<<endl;
             tempId++;
         }
     }
-    cout<<"after cluste bakchodi: \n";
-    for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
-    {
-        cout<<iter->first->clusterId<<", ";
-    }
-    cout<<endl;
+     inputGraph->printVertices();
+    cout<<"DONE!!"<<endl;
+    // cout<<"after cluste bakchodi: \n";
+    // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
+    // {
+    //     // cout<<iter->first->clusterId<<", ";
+    // }
+    // cout<<endl;
 
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++){
         if(iter->first->clusterId != -1)
@@ -562,8 +594,8 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
         if(iter->first->clusterId != -1)inputGraph->clusters[iter->first->clusterId].push_back(iter->first);
     }
 
-    cout<< "After all splits and bfs\n";
-    inputGraph->printVertices();
+    // cout<< "After all splits and bfs\n";
+    // inputGraph->printVertices();
     // cout<<"Printing clusters before phi set:"<<endl;
     // inputGraph->printClusters();
     
@@ -572,13 +604,17 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
 
     vector<pair<vertex*, vertex*>> temp;
 
+        cout<<"before phi"<<endl;
+    inputGraph->printVertices();
+    bfsTreeObject->printBfsSet();
+
     for(auto it:bfsTreeObject->phi)
     {
         temp.push_back({it.first, it.second});
     }
     for(auto it:temp)
     {
-        
+        // inputGraph->printVertices();
     //    cout<<isCore(it.first)<<" "<<isCore(it.second)<<endl;
         if((it.first)->clusterId != (it.second)->clusterId)
         {
@@ -592,7 +628,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
                 {
                     bfsTreeObject->merge(it.second,it.first);
                 }
-                inputGraph->printVertices();
+                // inputGraph->printVertices();
                 it.first->memberType = 0;
                 it.second->memberType = 0;
             }
@@ -614,7 +650,8 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
             }
         }
     }
-
+    // cout<<"first round done"<<endl;
+    // inputGraph->printVertices();
     temp.clear();
     for(auto it:bfsTreeObject->phi)
     {
@@ -716,16 +753,16 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     }
 
 
-    cout<<"Similarity Values:"<<endl;
-    for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
-    {
-        for(auto it = iter->second.begin(); it!=iter->second.end();it++)
-        {
-            float sim = calculateSimilarity(iter->first, *it);
-            cout<<iter->first->ID<<" "<<(*it)->ID<<" "<<sim<<endl;
+    // cout<<"Similarity Values:"<<endl;
+    // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
+    // {
+    //     for(auto it = iter->second.begin(); it!=iter->second.end();it++)
+    //     {
+    //         float sim = calculateSimilarity(iter->first, *it);
+    //         cout<<iter->first->ID<<" "<<(*it)->ID<<" "<<sim<<endl;
 
-        }
-    }
+    //     }
+    // }
     // cout<<"dfnjdsn:"<<endl;
     // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     // {
@@ -748,31 +785,34 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
 
 void iscan::mergeCluster(vertex* w){
 
-    cout<<"Merge Cluster called:"<<w->ID<<w->memberType<<endl;
-
+    // cout<<"Merge Cluster called:"<<w->ID<<endl;
+    // cout<<w->memberType<<endl;
     if (w->memberType == 1){
-        int newClusterID = (1+inputGraph->clusters.rbegin()->first);
+        int newClusterID= 0;
+        if(!inputGraph->clusters.empty()){
+            newClusterID = (1+inputGraph->clusters.rbegin()->first);
+        }
         w->clusterId = newClusterID;
         inputGraph->clusters[newClusterID] = {w}; 
     }
-    cout<<"Epsilon neighbourhood:";printVector(getEpsilonNeighbourhood(w));
+    // cout<<"Epsilon neighbourhood:";printVector(getEpsilonNeighbourhood(w));
     for(auto u: getEpsilonNeighbourhood(w)){
         
         if(u->ID == w->ID) 
         {
             continue;
         }
-        cout<<u->memberType<<endl;
+        // cout<<u->memberType<<endl;
         if(u->memberType != 1){
             if(u->memberType == 2){
                 if(((u->clusterId == w->clusterId) && (u->parent != w)) || (u->clusterId != w->clusterId)){
-                    cout<<"a:"<<u->ID<<" "<<w->ID<<endl;
+                    // cout<<"a:"<<u->ID<<" "<<w->ID<<endl;
                     bfsTreeObject->addEdgeToPhi(u, w);
                 }
             }
             else{
                 if((u->clusterId == w->clusterId) && (u->parent != w) && (w->parent != u)){
-                    cout<<"b:"<<u->ID<<" "<<w->ID<<endl;
+                    // cout<<"b:"<<u->ID<<" "<<w->ID<<endl;
                     bfsTreeObject->addEdgeToPhi(u, w);
                 }
                 if(u->clusterId != w->clusterId){
@@ -804,18 +844,18 @@ void iscan::mergeCluster(vertex* w){
             }
             u->hub_or_outlier = -1;
             u->clusterId = w->clusterId;
-            u->parent = w;
             bfsTreeObject->addEdgeToBfsSet(w, u);
         }
     }
 
-    inputGraph->printVertices();
+    // inputGraph->printVertices();
 
 }
 
 void iscan::splitCluster(vertex* u, vertex* v, unordered_set<vertex*>& old_cores){
 
-    cout<<"Split:"<<u->ID<<" "<<v->ID<<endl;
+    // cout<<"Split:"<<u->ID<<" "<<v->ID<<endl;
+    // cout<<u->memberType<<" "<<v->memberType;
     if((u->memberType == 0) && (v->memberType == 0)){
         if((u->parent != v) && (v->parent != u)){
             bfsTreeObject->removeEdgeFromPhi(u, v);

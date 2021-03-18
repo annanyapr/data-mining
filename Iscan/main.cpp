@@ -116,6 +116,7 @@ int main(int argc, char* argv[])
             
             iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
             IS->executeSCAN();
+            cout<<"SCAN Results:"<<endl;
             G->printClusters();
 
 

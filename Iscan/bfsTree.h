@@ -32,6 +32,8 @@ class bfsTree
         
         void printPhiSet();
 
+        void switchParents(vertex* v);
+
         bfsTree();
 };
 
@@ -41,7 +43,7 @@ void bfsTree::addEdgeToPhi(vertex* v1, vertex* v2)
 {
     int temp = findInPhi(v1, v2);
     if(temp == 2){
-        cout<<"adding phi edge<< "<<v1->ID<<" "<<v2->ID<<endl;
+        // cout<<"adding phi edge<< "<<v1->ID<<" "<<v2->ID<<endl;
         phi.insert({v1, v2});
     }
 
@@ -83,7 +85,7 @@ void bfsTree::addEdgeToBfsSet(vertex* v1, vertex* v2)
 
     int temp = findInBfsSet(v1, v2);
     if(temp == 2){
-        cout<<"adding BFS edge<< "<<v1->ID<<" "<<v2->ID<<endl;
+        // cout<<"adding BFS edge<< "<<v1->ID<<" "<<v2->ID<<endl;
         bfsSet.insert({v1, v2});
         v1->children.insert(v2);
         v2->parent = v1;
@@ -94,7 +96,7 @@ void bfsTree::addEdgeToBfsSet(vertex* v1, vertex* v2)
 bool bfsTree::removeEdgeFromBfsSet(vertex* v1, vertex* v2)
 {
     int temp = findInBfsSet(v1, v2);
-    cout<<"BFS remove:" << v1->ID<<" "<<v2->ID<<endl;
+    cout<<"BFS remove:" << v1->ID<<" "<<v2->ID<<" "<<temp <<endl;
 
     if(temp == 0)
     {
@@ -130,13 +132,30 @@ int bfsTree::findInBfsSet(vertex* v1, vertex* v2)
 // Do accordingly in mergeCluster
 void bfsTree::merge(vertex* v1, vertex* v2)
 {
+    cout<<"merging: "<<v1->ID<<" "<<v2->ID<<endl;
     removeEdgeFromPhi(v1, v2);
+    switchParents(v1);
     addEdgeToBfsSet(v2, v1);
 
     int clusterId = v2->clusterId;
-    recurseParent(v1, v1->parent, clusterId);
     recurseChildren(v1, clusterId);
 
+}
+
+void bfsTree::switchParents(vertex* v){
+    
+    if(v->parent == NULL)
+    {
+        return;
+    }
+    // cout<<"ID"<<v->ID<<endl;
+    switchParents(v->parent);
+    bfsSet.erase({v->parent,v});
+    bfsSet.insert({v,v->parent});
+    v->parent->children.erase(v);
+    v->parent->parent= v;    
+    v->children.insert(v->parent);
+    
 }
 
 void bfsTree::recurseChildren(vertex* v, int clusterId)
@@ -148,10 +167,16 @@ void bfsTree::recurseChildren(vertex* v, int clusterId)
     
     // cout<<"child:"<<v->ID<<endl;
     queue<vertex* > q;
+
+
+
+    
     for(auto it=v->children.begin(); it!=v->children.end();it++)
     {
+        cout<< (*it)->ID<<" ";
         q.push(*it);
     }
+    // cout<<"queue size: "<< q.size()<<endl;
     while(!q.empty())
     {
         
@@ -166,6 +191,7 @@ void bfsTree::recurseChildren(vertex* v, int clusterId)
             q.push(*it);
         }
     }
+    cout<<"Done"<<endl;
 }
 
 void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
@@ -176,14 +202,14 @@ void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
     {
         return;
     }
-    cout<< "parent: "<<parent->ID<<endl;
+    // cout<< "parent: "<<parent->ID<<endl;
     parent->clusterId = clusterId;
-    cout<< "parentID: "<<parent->clusterId<<endl;
+    // cout<< "parentID: "<<parent->clusterId<<endl;
     for(auto it = parent->children.begin(); it!=parent->children.end();it++)
     {
         (*it)->clusterId = clusterId;
 
-        cout<<parent->ID<<"'s children: "<<(*it)->ID<<" clusterid: "<< (*it)->clusterId;
+        // cout<<parent->ID<<"'s children: "<<(*it)->ID<<" clusterid: "<< (*it)->clusterId;
 
         if(*it != u){
             recurseChildren(*it, clusterId);
