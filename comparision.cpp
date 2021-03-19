@@ -39,8 +39,8 @@ int main(int argc, char* argv[])
 
             iscan *iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
 
-            iscanObject->executeSCAN();
-            cout<<"Initial Iscan clustering Done"<<endl;
+            // iscanObject->executeSCAN();
+            // cout<<"Initial Iscan clustering Done"<<endl;
 
             double incrementalTime = 0;
             double scanTime = 0;
@@ -72,6 +72,8 @@ int main(int argc, char* argv[])
                         }
                     }
                                         
+                    cout<<"Graph structure after adding edge"<<endl;
+                    currentG->printGraph();cout<<endl;
                     iscan *scanObject = new iscan(stof(argv[3]), stoi(argv[4]), currentG);
                     cout<<"Clustering by SCAN:"<<endl;
                     auto start = chrono::steady_clock::now();
@@ -87,15 +89,17 @@ int main(int argc, char* argv[])
                     end = chrono::steady_clock::now();
                     diff = end - start;
                     incrementalTime += chrono::duration <double, milli> (diff).count();
-                    iscanG->printGraph();
+                    
                     // iscanG->printVertices();
                     iscanG->printClusters(); 
+                    cout<<"--------------------------------"<<endl;
                     
                 }
             }       
-
+            cout<<"--------------------------------"<<endl;
+            cout<<"Running time:"<<endl;
             cout<<"SCAN Time:"<<scanTime<<endl;
-            cout<<"Incremental Time:"<<incrementalTime<<endl;
+            cout<<"Incremental SCAN Time:"<<incrementalTime<<endl;
 
         }
     }
@@ -134,8 +138,8 @@ int main(int argc, char* argv[])
 
             iscan *iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
 
-            iscanObject->executeSCAN();
-            cout<<"Initial Iscan clustering Done"<<endl;
+            // iscanObject->executeSCAN();
+            // cout<<"Initial Iscan clustering Done"<<endl;
 
             double incrementalTime = 0;
             double scanTime = 0;
@@ -173,6 +177,9 @@ int main(int argc, char* argv[])
                             }
                         }
                                             
+                        cout<<"Graph structure after adding edge"<<endl;
+                        currentG->printGraph();cout<<endl;
+
                         iscan *scanObject = new iscan(stof(argv[3]), stoi(argv[4]), currentG);
                         cout<<"\n\nClustering by SCAN:"<<endl;
                         auto start = chrono::steady_clock::now();
@@ -188,11 +195,16 @@ int main(int argc, char* argv[])
                         end = chrono::steady_clock::now();
                         diff = end - start;
                         incrementalTime += chrono::duration <double, milli> (diff).count();
-                        iscanG->printGraph();
+                        // iscanG->printGraph();
                         iscanG->printClusters(); 
+                        cout<<"--------------------------------"<<endl;
                     }
                 }
             }
+            cout<<"--------------------------------"<<endl;
+            cout<<"Running time:"<<endl;
+            cout<<"SCAN Time:"<<scanTime<<endl;
+            cout<<"Incremental SCAN Time:"<<incrementalTime<<endl;
         }
     }
 

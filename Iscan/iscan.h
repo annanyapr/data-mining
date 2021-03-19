@@ -441,7 +441,7 @@ void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> e
 
 
 void iscan::updateEdge(int id1, int id2, bool isAdded){
-    inputGraph->printVertices();
+    // inputGraph->printVertices();
     
     // cout<<"Before Update edge:"<<endl;
     // for(auto it:bfsTreeObject->phi)
@@ -507,8 +507,8 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     }
 
 
-    cout<<"After mergeCluster:"<<endl;
-    inputGraph->printVertices();
+    // cout<<"After mergeCluster:"<<endl;
+    // inputGraph->printVertices();
     // for(auto it:bfsTreeObject->phi)
     // {
     //     cout<<it.first->ID<<" "<<it.second->ID<<endl;
@@ -529,8 +529,8 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     // {
     //     cout<<it.first->ID<<" "<<it.second->ID<<endl;
     // }
-    cout<<"After Split"<<endl;
-    inputGraph->printVertices();
+    // cout<<"After Split"<<endl;
+    // inputGraph->printVertices();
     // bfsTreeObject->printBfsSet();
     // bfsTreeObject->printPhiSet();
     // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
@@ -546,13 +546,13 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     }
 
 // Reassigned Cluster Ids
-    // cout<<"before cluste bakchodi: \n";
-    inputGraph->printVertices();
+    // cout<<"before cluster: \n";
+    // inputGraph->printVertices();
 
     int tempId = 0;
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++){
         if(iter->first->clusterId == -1 && (iter->first->parent != NULL || !(iter->first->children.empty()))){
-            cout<<"re bfs stuff: "<<iter->first->ID<<endl;
+            // cout<<"re bfs stuff: "<<iter->first->ID<<endl;
             // inputGraph->printVertices();
             // cout<<"recurse parests "<<endl;
             bfsTreeObject->recurseParent(iter->first, iter->first->parent, tempId);
@@ -567,9 +567,9 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
             tempId++;
         }
     }
-     inputGraph->printVertices();
-    cout<<"DONE!!"<<endl;
-    // cout<<"after cluste bakchodi: \n";
+    //  inputGraph->printVertices();
+    // cout<<"DONE!!"<<endl;
+    // cout<<"after cluster: \n";
     // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     // {
     //     // cout<<iter->first->clusterId<<", ";
@@ -604,9 +604,9 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
 
     vector<pair<vertex*, vertex*>> temp;
 
-        cout<<"before phi"<<endl;
-    inputGraph->printVertices();
-    bfsTreeObject->printBfsSet();
+        // cout<<"before phi"<<endl;
+    // inputGraph->printVertices();
+    // bfsTreeObject->printBfsSet();
 
     for(auto it:bfsTreeObject->phi)
     {
@@ -619,7 +619,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
         if((it.first)->clusterId != (it.second)->clusterId)
         {
             if(isCore(it.first) && isCore(it.second)){
-                cout<<"Merging"<<it.first->ID << " " << it.second->ID<<endl;
+                // cout<<"Merging"<<it.first->ID << " " << it.second->ID<<endl;
                 if(inputGraph->clusters[(it.first)->clusterId].size() < inputGraph->clusters[(it.second)->clusterId].size())
                 {
                     bfsTreeObject->merge(it.first,it.second);
@@ -921,6 +921,5 @@ void iscan::printVector(vector<vertex*> n)
 /*
 TODO:
 
-1. Reasssigning clusterid after split cluster
-2. Storing all similariy values
+1. clusterid -1 assigned when 1st edge is added in empty graph
 */
