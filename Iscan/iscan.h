@@ -35,7 +35,8 @@ public:
     float getSimilarity(vertex*, vertex*);
     float calculateSimilarity(vertex*, vertex*);
 
-    void updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> vertices);
+    void updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> edges);
+    bool checkCycle();
 
     // Returns epsilon neighbourhood of a neighbourhood
     vector<vertex*> getEpsilonNeighbourhood(vertex*);
@@ -62,9 +63,9 @@ public:
 
     void updateEdge(int id1, int id2, bool isAdded);
 
-    void mergeCluster(vertex* v);
+    void mergeCluster(vertex* w);
 
-    void splitCluster(vertex* v1, vertex* v2, unordered_set<vertex*>& old_cores);
+    void splitCluster(vertex* u, vertex* v2, unordered_set<vertex*>& old_cores);
 
 
     void printVector(vector<vertex*> neighbours);
@@ -441,8 +442,9 @@ void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> e
 
 
 void iscan::updateEdge(int id1, int id2, bool isAdded){
-    // inputGraph->printVertices();
-    
+//     inputGraph->printVertices();
+    if((id1+id2) == 16)
+        int a = 0;
     // cout<<"Before Update edge:"<<endl;
     // for(auto it:bfsTreeObject->phi)
     // {
@@ -655,7 +657,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     temp.clear();
     for(auto it:bfsTreeObject->phi)
     {
-        temp.push_back({it.first, it.second});
+        temp.emplace_back(it.first, it.second);
     }
     for(auto it:temp)
     {
@@ -749,7 +751,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     inputGraph->clusters.clear();
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     {
-        if(iter->first->hub_or_outlier == -1)inputGraph->clusters[iter->first->clusterId].push_back(iter->first);
+        if(iter->first->clusterId != -1)inputGraph->clusters[iter->first->clusterId].push_back(iter->first);
     }
 
 
@@ -781,18 +783,20 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     // }
 
     // inputGraph->printClusters();
+//    checkCycle();
 }
 
 void iscan::mergeCluster(vertex* w){
 
     // cout<<"Merge Cluster called:"<<w->ID<<endl;
     // cout<<w->memberType<<endl;
-    if (w->memberType == 1){
+    if (w->memberType == 1|| w->memberType == -1){
         int newClusterID= 0;
         if(!inputGraph->clusters.empty()){
             newClusterID = (1+inputGraph->clusters.rbegin()->first);
         }
         w->clusterId = newClusterID;
+        w->memberType=0;
         inputGraph->clusters[newClusterID] = {w}; 
     }
     // cout<<"Epsilon neighbourhood:";printVector(getEpsilonNeighbourhood(w));
@@ -803,7 +807,7 @@ void iscan::mergeCluster(vertex* w){
             continue;
         }
         // cout<<u->memberType<<endl;
-        if(u->memberType != 1){
+        if(u->memberType != 1 && u->memberType!= -1){
             if(u->memberType == 2){
                 if(((u->clusterId == w->clusterId) && (u->parent != w)) || (u->clusterId != w->clusterId)){
                     // cout<<"a:"<<u->ID<<" "<<w->ID<<endl;
@@ -822,7 +826,7 @@ void iscan::mergeCluster(vertex* w){
                         bfsTreeObject->merge(u, w);
                     }
                     else{
-                        // inputGraph->printVertices();
+                        // inputGraph->printVerticesF();
                         bfsTreeObject->merge(w, u);
                     }
                 }                    
@@ -918,8 +922,48 @@ void iscan::printVector(vector<vertex*> n)
     cout<<endl;
 }
 
-/*
-TODO:
+bool iscan::checkCycle()
+{
+    bool val = false;
+    bool curnoparent= false;
+    for(auto it:inputGraph->clusters)
+    {
+        curnoparent= false;
+        for(auto nodes :it.second)
+        {
+            if(nodes->parent==nullptr)
+            {
+                curnoparent=true;
+            }
 
-1. clusterid -1 assigned when 1st edge is added in empty graph
-*/
+        }
+        if(!curnoparent) {
+            val = true;
+        }
+    }
+    for(auto node:inputGraph->graphObject)
+    {
+        int numberchild= 0;
+        for(auto parents:inputGraph->graphObject )
+        {
+            for(auto childerns:parents.first->children)
+            {
+                if(node.first == childerns)
+                {
+                    numberchild++;
+                }
+
+            }
+
+        }
+        if(numberchild >1)
+        {
+            val =true;
+        }
+
+
+    }
+    assert(!val);
+    return val;
+
+}

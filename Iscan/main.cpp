@@ -48,8 +48,8 @@ int main(int argc, char* argv[])
             iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
             IS->executeSCAN();
             G->printClusters();
-            cout<<"Vertices information"<<endl;
-            G->printVertices();
+            // cout<<"Vertices information"<<endl;
+            // G->printVertices();
 
             cout<<"Initial clustering done."<<endl;
             cout<<"Number of edges to add/delete:"<<endl;
@@ -120,8 +120,8 @@ int main(int argc, char* argv[])
             G->printClusters();
 
 
-            cout<<"Vertices information"<<endl;
-            G->printVertices();
+            // cout<<"Vertices information"<<endl;
+            // G->printVertices();
 
             cout<<"Initial clustering done."<<endl;
             cout<<"Number of edges to add/delete:"<<endl;
@@ -179,8 +179,8 @@ int main(int argc, char* argv[])
             G->printClusters();
 
 
-            cout<<"Vertices information"<<endl;
-            G->printVertices();
+            // cout<<"Vertices information"<<endl;
+            // G->printVertices();
 
             cout<<"Initial clustering done."<<endl;
             cout<<"Number of edges to add/delete:"<<endl;

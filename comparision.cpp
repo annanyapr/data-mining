@@ -1,8 +1,10 @@
 #include<bits/stdc++.h>
 #include"Iscan/iscan.h"
-#include "readgml/readgml.h"
+#include "readgml/readgml.c"
 
 using namespace std;
+
+void checkClusters(map<int,vector<vertex*>> , map<int,vector<vertex*>>);
 
 int main(int argc, char* argv[])
 {
@@ -53,7 +55,9 @@ int main(int argc, char* argv[])
                         continue;
                     }
                     cout<<"Adding edge between "<<N->vertex[i].id<< " & "<<N->vertex[i].edge[j].target<<endl;
-                    nEdges++;
+                    nEdges+=1;
+                    scanG->numofEdges = nEdges;
+                    iscanG->numofEdges = nEdges;
                 
                     // Adding directed edges as Network contains a->b and b->a both
                     scanG->addEdge(N->vertex[i].id, N->vertex[i].edge[j].target);
@@ -71,6 +75,7 @@ int main(int argc, char* argv[])
                             currentG->addDirectedEdge((iter->first)->ID,(*it)->ID);
                         }
                     }
+                    currentG->numofEdges = nEdges;
                                         
                     cout<<"Graph structure after adding edge"<<endl;
                     currentG->printGraph();cout<<endl;
@@ -90,9 +95,13 @@ int main(int argc, char* argv[])
                     diff = end - start;
                     incrementalTime += chrono::duration <double, milli> (diff).count();
                     
-                    // iscanG->printVertices();
-                    iscanG->printClusters(); 
+                    iscanG->printClusters();
                     cout<<"--------------------------------"<<endl;
+
+                    // Checking if two clusters are same
+                    map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
+                    map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
+                    checkClusters(SCANClusters, ISCANClusters);
                     
                 }
             }       
@@ -144,7 +153,6 @@ int main(int argc, char* argv[])
             double incrementalTime = 0;
             double scanTime = 0;
             int temp;
-            // cout<<nvertices<<endl;
             for(int i=0;i<nvertices;i++)
             {
                 for(int j=0;j<nvertices;j++)
@@ -152,16 +160,17 @@ int main(int argc, char* argv[])
                     F>>temp;
                     if(temp==1)
                     {
-                        // cout<<"A"<<endl;
                         if(scanG->findEdge(i,j))
                         {
                             continue;
                         }
-                        nEdges++;
+                        nEdges+=1;
+                        scanG->numofEdges = nEdges;
+                        iscanG->numofEdges = nEdges;
                         cout<<"Adding edge between "<<i<< " & "<<j<<endl;
                 
                         // Adding directed edges as Network contains a->b and b->a both
-                        scanG->addDirectedEdge(i, j);
+                        scanG->addEdge(i, j);
                         
                         graph* currentG = new graph();
 
@@ -176,6 +185,7 @@ int main(int argc, char* argv[])
                                 currentG->addDirectedEdge((iter->first)->ID,(*it)->ID);
                             }
                         }
+                        currentG->numofEdges = nEdges;
                                             
                         cout<<"Graph structure after adding edge"<<endl;
                         currentG->printGraph();cout<<endl;
@@ -195,9 +205,14 @@ int main(int argc, char* argv[])
                         end = chrono::steady_clock::now();
                         diff = end - start;
                         incrementalTime += chrono::duration <double, milli> (diff).count();
-                        // iscanG->printGraph();
-                        iscanG->printClusters(); 
+                        iscanG->printClusters();
+
                         cout<<"--------------------------------"<<endl;
+
+                        map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
+                        map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
+                        checkClusters(SCANClusters, ISCANClusters);
+
                     }
                 }
             }
@@ -205,11 +220,58 @@ int main(int argc, char* argv[])
             cout<<"Running time:"<<endl;
             cout<<"SCAN Time:"<<scanTime<<endl;
             cout<<"Incremental SCAN Time:"<<incrementalTime<<endl;
+
         }
     }
 
 }
 
+void checkClusters(map<int,vector<vertex*>> s, map<int,vector<vertex*>>i)
+{
+    bool val = true;
+    if(s.size()!=i.size()){val = false;}
+    for(auto it=s.begin(); it!=s.end();it++)
+    {
+        int minID = (it)->second[0]->ID;
+        int cID = -1;
+        for(auto it1:i)
+        {
+            for(auto it2:(it1).second)
+            {
+                if(minID == it2->ID)
+                {
+                    cID = it2->clusterId;
+                    break;
+                }
+            }
+        }
+
+        if(cID == -1){val = false;break;}
+        if(it->second.size() != i[cID].size()){val = false;}
+        for(auto it1:it->second)
+        {
+            bool temp = false;
+            for(auto it2:i[cID])
+            {
+                if(it1->ID == (it2)->ID)
+                {
+                    temp = true;
+                    break;
+                }
+            }
+            if(!temp)
+            {
+                val = false;
+                break;
+            }
+
+        }
+
+
+    }
+    assert(val);
+
+}
 /*
     Dataset links:
         http://snap.stanford.edu/data/index.html

@@ -159,7 +159,7 @@ void graph::printGraph()
 {
     // cout<<"GRAPH: "<<endl;
     cout<<"Number of vertices: "<< numOfNodes<<endl;
-    // cout<<"Number of edges: "<< numofEdges<<endl;    // --TODO uncomment later
+    cout<<"Number of edges: "<< numofEdges<<endl;
     for(auto it=graphObject.begin(); it!=graphObject.end();it++)
     {
         cout<<(it->first)->ID<<": ";
