@@ -533,11 +533,14 @@ void iscan::updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>
 
     for( auto i : edges)
     {
+        edges_for_threads[number_of_edges % number_of_threads].push_back({i.first, i.second});
+        number_of_edges++;
         edges_for_threads[number_of_edges % number_of_threads].push_back({i.second, i.first});
         number_of_edges++;
     }
 
     number_of_threads = min(number_of_edges, number_of_threads);
+    // cout << "Number Of Threads: " << number_of_threads << endl;
 
     for(int i = 0; i < number_of_threads; i++){
         // thread thread_obj(worker_func, std::ref(epsilon_values), std::ref(edges_for_threads[i]), std::ref(inputGraph->graphObject));
@@ -545,6 +548,7 @@ void iscan::updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>
         // threads.push_back(thread_obj);
         threads.push_back(thread(worker_func, std::ref(epsilon_values), std::ref(edges_for_threads[i]), std::ref(inputGraph->graphObject)));
     }
+
     for(int i = 0; i < number_of_threads; i++){
         threads[i].join();
     }
@@ -610,7 +614,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
     //     for(auto it = iter->second.begin(); it!=iter->second.end();it++)
     //     {
     //         float sim = getSimilarity(iter->first, *it);
-            // cout<<iter->first->ID<<" "<<(*it)->ID<<" "<<sim<<endl;
+    //         cout<<iter->first->ID<<" "<<(*it)->ID<<" "<<sim<<endl;
 
     //     }
     // }

@@ -115,6 +115,7 @@ int main(int argc, char* argv[])
                     diff = end - start;
                     incrementalTime2 += chrono::duration <double, milli> (diff).count();
                     
+                    iscanG2->printClusters();
                     iscanG->printClusters();
                     cout<<"--------------------------------"<<endl;
 
