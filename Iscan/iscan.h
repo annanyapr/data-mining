@@ -35,7 +35,11 @@ public:
     float getSimilarity(vertex*, vertex*);
     float calculateSimilarity(vertex*, vertex*);
 
-    void updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> edges);
+    void updateRuvSimilaritySingleThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges);
+    
+    void updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges);
+    
+
     bool checkCycle();
 
     // Returns epsilon neighbourhood of a neighbourhood
@@ -49,7 +53,7 @@ public:
     void calculateAllSimilarityMultiThreaded();
 
     // Main clustering algorithm
-    void executeSCAN(int );
+    void executeSCAN(bool multithreading);
 
     // void updateEdge()
 
@@ -65,7 +69,7 @@ public:
 
     unordered_set<pair<vertex*,vertex*>,hash_pair> getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv);
 
-    void updateEdge(int id1, int id2, bool isAdded);
+    void updateEdge(int id1, int id2, bool isAdded, bool multithreading);
 
     void mergeCluster(vertex* w);
 
@@ -227,7 +231,7 @@ void iscan::calculateAllSimilarityMultiThreaded(){
 
 // creates clustering and classifies non member vertices as hubs or outliers
 
-void iscan::executeSCAN(int flag = 0)
+void iscan::executeSCAN(bool multithreading = false)
 {
     epsilon_values.clear();
 
@@ -241,7 +245,7 @@ void iscan::executeSCAN(int flag = 0)
     }
 
     // Compute initial similarities
-    if (flag == 0){
+    if (!multithreading){
         calculateAllSimilaritySingleThreaded();
     }
     else{
@@ -477,7 +481,6 @@ unordered_set<vertex*> iscan::getNuv(int Id1, int Id2){
     return s1;
 }
 
-// TODO chage to unordered set
 unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv){
 
     vertex* v1 = inputGraph->vertexMap[Id1];
@@ -510,7 +513,17 @@ unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, u
     return ret;
 }
 
-void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> edges)
+void iscan::updateRuvSimilaritySingleThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges)
+{
+
+    for( auto i : edges)
+    {
+        epsilon_values[i] = calculateSimilarity(i.first,i.second); 
+        epsilon_values[{i.second, i.first}] = epsilon_values[i];
+    }
+}
+
+void iscan::updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges)
 {
     int number_of_threads = 4;
     vector<thread> threads;
@@ -540,7 +553,7 @@ void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> e
 }
 
 
-void iscan::updateEdge(int id1, int id2, bool isAdded){
+void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = false){
 //     inputGraph->printVertices();
     if((id1+id2) == 16)
         int a = 0;
@@ -587,8 +600,10 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     }
     // inputGraph->printGraph();
 
-
-    updateRuvSimilarity(Ruv);
+    if(multithreading)
+        updateRuvSimilaritySingleThreaded(Ruv);
+    else
+        updateRuvSimilarityMultiThreaded(Ruv);
     // cout<<"Similarity Values:"<<endl;
     // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     // {

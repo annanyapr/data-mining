@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 
             iscan *iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
             auto start = chrono::steady_clock::now();
-            iscanObject->executeSCAN(1);
+            iscanObject->executeSCAN(true);
             auto end = chrono::steady_clock::now();
 
             iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
 
 
             double incrementalTime = 0;
+            double incrementalTime2 = 0;
             double scanTime = 0;
             for(int i=0;i<N->nvertices;i++)
             {
@@ -96,6 +97,14 @@ int main(int argc, char* argv[])
                     currentG->printClusters();
                     
                     cout<<"\n\nIncremental Clustering by ISCAN:"<<endl;
+                    /*MultiThread*/
+                    start = chrono::steady_clock::now();
+                    iscanObject->updateEdge(N->vertex[i].id, N->vertex[i].edge[j].target, 1,true);
+                    end = chrono::steady_clock::now();
+                    diff = end - start;
+                    incrementalTime2 += chrono::duration <double, milli> (diff).count();
+                    
+                    /*Single Thread*/
                     start = chrono::steady_clock::now();
                     iscanObject->updateEdge(N->vertex[i].id, N->vertex[i].edge[j].target, 1);
                     end = chrono::steady_clock::now();
@@ -115,7 +124,8 @@ int main(int argc, char* argv[])
             cout<<"--------------------------------"<<endl;
             cout<<"Running time:"<<endl;
             cout<<"SCAN Time:"<<scanTime<<endl;
-            cout<<"Incremental SCAN Time:"<<incrementalTime<<endl;
+            cout<<"Incremental SCAN Time with parallel threads:"<<incrementalTime2<<endl;
+            cout<<"Incremental SCAN Time without parallel threads:"<<incrementalTime<<endl;
             cout<<"Initial SCAN Time with parallel threads: "<< chrono::duration <double, milli> (end-start).count() << endl; 
             cout<<"Initial SCAN Time without parallel threads: "<< chrono::duration <double, milli> (end_2-start_2).count() << endl; 
 
