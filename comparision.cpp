@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
             int r = read_network(N, F);
             graph* scanG = new graph();
             graph* iscanG = new graph();
+            graph* iscanG2 = new graph();
 
 
             // First add all vertices then add edges
@@ -32,21 +33,23 @@ int main(int argc, char* argv[])
                 // Add new vertex to graph with id and name
                 scanG->addVertex(N->vertex[i].id, N->vertex[i].label); 
                 iscanG->addVertex(N->vertex[i].id, N->vertex[i].label); 
+                iscanG2->addVertex(N->vertex[i].id, N->vertex[i].label);
             }
 
             int nEdges = 0;
             scanG->numofEdges = nEdges;
             iscanG->numofEdges = nEdges;
-
+            iscanG2->numofEdges = nEdges;
 
             iscan *iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
+            iscan *iscanObject2 = new iscan(stof(argv[3]), stoi(argv[4]), iscanG2);
+
             auto start = chrono::steady_clock::now();
             iscanObject->executeSCAN(true);
             auto end = chrono::steady_clock::now();
 
-            iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
             auto start_2 = chrono::steady_clock::now();
-            iscanObject->executeSCAN();
+            iscanObject2->executeSCAN();
             auto end_2 = chrono::steady_clock::now();
             cout<<"Initial Iscan clustering Done"<<endl;
 
@@ -66,6 +69,7 @@ int main(int argc, char* argv[])
                     nEdges+=1;
                     scanG->numofEdges = nEdges;
                     iscanG->numofEdges = nEdges;
+                    iscanG2->numofEdges = nEdges;
                 
                     // Adding directed edges as Network contains a->b and b->a both
                     scanG->addEdge(N->vertex[i].id, N->vertex[i].edge[j].target);
@@ -102,14 +106,14 @@ int main(int argc, char* argv[])
                     iscanObject->updateEdge(N->vertex[i].id, N->vertex[i].edge[j].target, 1,true);
                     end = chrono::steady_clock::now();
                     diff = end - start;
-                    incrementalTime2 += chrono::duration <double, milli> (diff).count();
+                    incrementalTime += chrono::duration <double, milli> (diff).count();
                     
                     /*Single Thread*/
                     start = chrono::steady_clock::now();
-                    iscanObject->updateEdge(N->vertex[i].id, N->vertex[i].edge[j].target, 1);
+                    iscanObject2->updateEdge(N->vertex[i].id, N->vertex[i].edge[j].target, 1);
                     end = chrono::steady_clock::now();
                     diff = end - start;
-                    incrementalTime += chrono::duration <double, milli> (diff).count();
+                    incrementalTime2 += chrono::duration <double, milli> (diff).count();
                     
                     iscanG->printClusters();
                     cout<<"--------------------------------"<<endl;
@@ -124,8 +128,8 @@ int main(int argc, char* argv[])
             cout<<"--------------------------------"<<endl;
             cout<<"Running time:"<<endl;
             cout<<"SCAN Time:"<<scanTime<<endl;
-            cout<<"Incremental SCAN Time with parallel threads:"<<incrementalTime2<<endl;
-            cout<<"Incremental SCAN Time without parallel threads:"<<incrementalTime<<endl;
+            cout<<"Incremental SCAN Time with parallel threads:"<<incrementalTime<<endl;
+            cout<<"Incremental SCAN Time without parallel threads:"<<incrementalTime2<<endl;
             cout<<"Initial SCAN Time with parallel threads: "<< chrono::duration <double, milli> (end-start).count() << endl; 
             cout<<"Initial SCAN Time without parallel threads: "<< chrono::duration <double, milli> (end_2-start_2).count() << endl; 
 

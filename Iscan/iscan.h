@@ -601,9 +601,9 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
     // inputGraph->printGraph();
 
     if(multithreading)
-        updateRuvSimilaritySingleThreaded(Ruv);
-    else
         updateRuvSimilarityMultiThreaded(Ruv);
+    else
+        updateRuvSimilaritySingleThreaded(Ruv);
     // cout<<"Similarity Values:"<<endl;
     // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     // {
