@@ -1,6 +1,6 @@
 #include<bits/stdc++.h>
 #include"Iscan/iscan.h"
-#include "readgml/readgml.c"
+#include"readgml/readgml.h"
 
 using namespace std;
 
@@ -40,9 +40,16 @@ int main(int argc, char* argv[])
 
 
             iscan *iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
+            auto start = chrono::steady_clock::now();
+            iscanObject->executeSCAN(1);
+            auto end = chrono::steady_clock::now();
 
-            // iscanObject->executeSCAN();
-            // cout<<"Initial Iscan clustering Done"<<endl;
+            iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
+            auto start_2 = chrono::steady_clock::now();
+            iscanObject->executeSCAN();
+            auto end_2 = chrono::steady_clock::now();
+            cout<<"Initial Iscan clustering Done"<<endl;
+
 
             double incrementalTime = 0;
             double scanTime = 0;
@@ -101,7 +108,7 @@ int main(int argc, char* argv[])
                     // Checking if two clusters are same
                     map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
                     map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
-                    checkClusters(SCANClusters, ISCANClusters);
+                    // checkClusters(SCANClusters, ISCANClusters);
                     
                 }
             }       
@@ -109,6 +116,8 @@ int main(int argc, char* argv[])
             cout<<"Running time:"<<endl;
             cout<<"SCAN Time:"<<scanTime<<endl;
             cout<<"Incremental SCAN Time:"<<incrementalTime<<endl;
+            cout<<"Initial SCAN Time with parallel threads: "<< chrono::duration <double, milli> (end-start).count() << endl; 
+            cout<<"Initial SCAN Time without parallel threads: "<< chrono::duration <double, milli> (end_2-start_2).count() << endl; 
 
         }
     }
@@ -211,7 +220,7 @@ int main(int argc, char* argv[])
 
                         map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
                         map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
-                        checkClusters(SCANClusters, ISCANClusters);
+                        // checkClusters(SCANClusters, ISCANClusters);
 
                     }
                 }

@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 
             // create clusters and generates hubs and outliers
             iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
-            IS->executeSCAN();
+            IS->executeSCAN(1);
             G->printClusters();
             // cout<<"Vertices information"<<endl;
             // G->printVertices();

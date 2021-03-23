@@ -44,8 +44,12 @@ public:
     // Checks if a vertex is core
     bool isCore(vertex*);
 
+    void calculateAllSimilaritySingleThreaded();
+
+    void calculateAllSimilarityMultiThreaded();
+
     // Main clustering algorithm
-    void executeSCAN();
+    void executeSCAN(int );
 
     // void updateEdge()
 
@@ -147,11 +151,8 @@ bool iscan::isCore(vertex* v)
 }
 
 
-// creates clustering and classifies non member vertices as hubs or outliers
-void iscan::executeSCAN()
-{
-    epsilon_values.clear();
-    // Compute initial similarities
+
+void iscan::calculateAllSimilaritySingleThreaded(){
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     {
         for(auto it = iter->second.begin(); it!=iter->second.end();it++)
@@ -160,6 +161,91 @@ void iscan::executeSCAN()
             epsilon_values[{iter->first, *it}] = sim;
 
         }
+    }
+}
+
+
+void worker_func(unordered_map<pair<vertex *, vertex *>, float, hash_pair>& epsilon_values, vector<pair<vertex *, vertex *>>& edges, unordered_map<vertex *, vector<vertex *>>& graphObject){
+    for(auto iter = edges.begin(); iter != edges.end(); iter++){
+
+        vertex* v1 = iter->first;
+        vertex* v2 = iter->second;
+        vector<vertex*>neighbour1 = graphObject[v1];
+        vector<vertex*>neighbour2 = graphObject[v2];
+
+        unordered_set<vertex*> s1(neighbour1.begin(), neighbour1.end());
+        s1.insert(v1);
+
+        neighbour2.push_back(v2);
+        int count=0;
+        for(auto it=neighbour2.begin();it!=neighbour2.end();it++)
+        {
+            if(s1.find(*it)!=s1.end())
+            {
+                count++;
+            }
+        }
+        epsilon_values[*iter] = ((float)count)/(sqrt(s1.size()*neighbour2.size()));
+    }
+
+
+}
+
+void iscan::calculateAllSimilarityMultiThreaded(){
+    int number_of_threads = 4;
+    vector<thread> threads;
+    vector<vector<pair<vertex*, vertex*>>> edges_for_threads(number_of_threads);
+    
+    int number_of_edges = 0;
+
+    for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
+    {
+        for(auto it = iter->second.begin(); it!=iter->second.end();it++)
+        {
+            edges_for_threads[number_of_edges % number_of_threads].push_back({iter->first, *it});
+            number_of_edges++;
+        }
+    }
+
+    number_of_threads = min(number_of_edges, number_of_threads);   
+
+
+    for(int i = 0; i < number_of_threads; i++){
+        // thread thread_obj(worker_func, std::ref(epsilon_values), std::ref(edges_for_threads[i]), std::ref(inputGraph->graphObject));
+        threads.push_back(thread(worker_func, std::ref(epsilon_values), std::ref(edges_for_threads[i]), std::ref(inputGraph->graphObject)));
+    }
+
+
+    for(int i = 0; i < number_of_threads; i++){
+        threads[i].join();
+    }
+
+
+}
+
+
+
+// creates clustering and classifies non member vertices as hubs or outliers
+
+void iscan::executeSCAN(int flag = 0)
+{
+    epsilon_values.clear();
+
+    for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
+    {
+        for(auto it = iter->second.begin(); it!=iter->second.end();it++)
+        {
+            epsilon_values[{iter->first, *it}] = 0;
+
+        }
+    }
+
+    // Compute initial similarities
+    if (flag == 0){
+        calculateAllSimilaritySingleThreaded();
+    }
+    else{
+        calculateAllSimilarityMultiThreaded();
     }
 
     // ofstream outputFile;
@@ -426,18 +512,31 @@ unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, u
 
 void iscan::updateRuvSimilarity(unordered_set<pair<vertex*,vertex*>,hash_pair> edges)
 {
+    int number_of_threads = 4;
+    vector<thread> threads;
+    vector<vector<pair<vertex*, vertex*>>> edges_for_threads(number_of_threads);
+
+    int number_of_edges = 0;
+
     for( auto i : edges)
     {
-        // cout<<"updating: "<<i.first->ID<<" "<<i.second->ID<<endl;
-                 // if(epsilon_values.find(i)!=epsilon_values.end()){
-        //     epsilon_values.erase(i);
-        // }
-        // else{
-        //     epsilon_values.erase({i.second,i.first});
-        // }
-        epsilon_values[i] = calculateSimilarity(i.first,i.second); 
-        epsilon_values[{i.second, i.first}] = epsilon_values[i];  
+        edges_for_threads[number_of_edges % number_of_threads].push_back({i.second, i.first});
+        number_of_edges++;
     }
+
+    number_of_threads = min(number_of_edges, number_of_threads);
+
+    for(int i = 0; i < number_of_threads; i++){
+        // thread thread_obj(worker_func, std::ref(epsilon_values), std::ref(edges_for_threads[i]), std::ref(inputGraph->graphObject));
+        
+        // threads.push_back(thread_obj);
+        threads.push_back(thread(worker_func, std::ref(epsilon_values), std::ref(edges_for_threads[i]), std::ref(inputGraph->graphObject)));
+    }
+    for(int i = 0; i < number_of_threads; i++){
+        threads[i].join();
+    }
+
+
 }
 
 
@@ -476,6 +575,9 @@ void iscan::updateEdge(int id1, int id2, bool isAdded){
     if(isAdded)
     {
         inputGraph->addEdge(id1,id2);
+        // So that the size of container doesn't change
+        epsilon_values[{inputGraph->vertexMap[id2], inputGraph->vertexMap[id1]}] = 0;
+        epsilon_values[{inputGraph->vertexMap[id1], inputGraph->vertexMap[id2]}] = 0;
     }
     else
     {
