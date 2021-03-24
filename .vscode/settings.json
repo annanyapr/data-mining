@@ -18,7 +18,9 @@
         "ostream": "cpp",
         "chrono": "cpp",
         "ratio": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "thread": "cpp",
+        "iosfwd": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

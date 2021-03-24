@@ -36,3 +36,4 @@ output.txt
 /cmake-build-debug/
 
 /.idea/
+*.txt

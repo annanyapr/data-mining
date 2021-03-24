@@ -28,8 +28,12 @@ public:
 
     bfsTree* bfsTreeObject;
 
+    // Number of threads
+    int number_of_threads = 4;
+
     // Constructor
     iscan(float, int, graph*);
+    iscan(float, int, graph*, int);
 
     // Calculates similarity between two vertices
     float getSimilarity(vertex*, vertex*);
@@ -89,6 +93,14 @@ iscan::iscan(float ep,int mu, graph* inputGraph)
     this->bfsTreeObject = new bfsTree();
 }
 
+iscan::iscan(float ep,int mu, graph* inputGraph, int number_of_threads)
+{
+    this->epsilon = ep;
+    this->mu = mu;
+    this->inputGraph = inputGraph;
+    this->bfsTreeObject = new bfsTree();
+    this->number_of_threads = number_of_threads;
+}
 
 // calculates similarity between two vertices
 float iscan::getSimilarity(vertex* v1, vertex* v2)
@@ -196,7 +208,6 @@ void worker_func(unordered_map<pair<vertex *, vertex *>, float, hash_pair>& epsi
 }
 
 void iscan::calculateAllSimilarityMultiThreaded(){
-    int number_of_threads = 4;
     vector<thread> threads;
     vector<vector<pair<vertex*, vertex*>>> edges_for_threads(number_of_threads);
     
@@ -526,7 +537,6 @@ void iscan::updateRuvSimilaritySingleThreaded(unordered_set<pair<vertex*,vertex*
 
 void iscan::updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges)
 {
-    int number_of_threads = 2;
     vector<thread> threads;
     vector<vector<pair<vertex*, vertex*>>> edges_for_threads(number_of_threads);
 
