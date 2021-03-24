@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
             int r = read_network(N, F);
             graph* G = new graph();
 
+
             // First add all vertices then add edges
             for(int i=0;i<N->nvertices;i++)
             {
@@ -147,6 +148,8 @@ int main(int argc, char* argv[])
         else
         {
             graph* G = new graph();
+            graph* G2 = new graph();
+
             string line;
             int nedges = 0;
             while(getline(F, line)){nedges++;}
@@ -159,15 +162,21 @@ int main(int argc, char* argv[])
                 if(G->vertexMap.find(id1)==G->vertexMap.end())
                 {
                     G->addVertex(id1, "");
+                    G2->addVertex(id1, "");
+
                 }
                 if(G->vertexMap.find(id2)==G->vertexMap.end())
                 {
                     G->addVertex(id2, "");
+                    G2->addVertex(id2, "");
+
                 }
                 G->addEdge(id1, id2);
+                G2->addEdge(id1, id2);
+
             }
 
-            G->printGraph();
+            // G->printGraph();
 
             
             if(stof(argv[3])>1 || stof(argv[3])<=0){cout<<"Epsilon value should be between 0 and 1"<<endl;exit(0);}
@@ -175,27 +184,40 @@ int main(int argc, char* argv[])
 
             // create clusters and generates hubs and outliers
             iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
+            iscan *IS2 = new iscan(stof(argv[3]), stoi(argv[4]), G2);
+
+             auto start2 = chrono::steady_clock::now();
+            IS2->executeSCAN(true);
+            auto end2 = chrono::steady_clock::now();
+
+            auto start = chrono::steady_clock::now();
             IS->executeSCAN();
-            G->printClusters();
+            auto end = chrono::steady_clock::now();
+
+           
+            cout << "SCAN without multi threading " << chrono::duration <double, milli> (end - start).count() << endl;
+            cout << "SCAN with multithreading" << chrono::duration <double, milli> (end2 - start2).count();
+            cout << endl; 
+            // G->printClusters();
 
 
             // cout<<"Vertices information"<<endl;
             // G->printVertices();
 
-            cout<<"Initial clustering done."<<endl;
-            cout<<"Number of edges to add/delete:"<<endl;
+            // cout<<"Initial clustering done."<<endl;
+            // cout<<"Number of edges to add/delete:"<<endl;
             
-            int numupdates, update, src, dest;
-            cin>>numupdates;
-            for(int i=0;i<numupdates;i++)
-            {
-                // Check if vertex exists or not and same for edge
-                cin>>update>>src>>dest;
-                IS->updateEdge(src, dest, update);   
-                // G->printVertices();
-            }
+            // int numupdates, update, src, dest;
+            // cin>>numupdates;
+            // for(int i=0;i<numupdates;i++)
+            // {
+            //     // Check if vertex exists or not and same for edge
+            //     cin>>update>>src>>dest;
+            //     IS->updateEdge(src, dest, update);   
+            //     // G->printVertices();
+            // }
 
-            G->printClusters();
+            // G->printClusters();
         }
     }
 }

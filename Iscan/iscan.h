@@ -243,12 +243,13 @@ void iscan::executeSCAN(bool multithreading = false)
 
         }
     }
-
+        // cout << multithreading << endl;
     // Compute initial similarities
     if (!multithreading){
         calculateAllSimilaritySingleThreaded();
     }
     else{
+
         calculateAllSimilarityMultiThreaded();
     }
 
@@ -525,7 +526,7 @@ void iscan::updateRuvSimilaritySingleThreaded(unordered_set<pair<vertex*,vertex*
 
 void iscan::updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges)
 {
-    int number_of_threads = 4;
+    int number_of_threads = 2;
     vector<thread> threads;
     vector<vector<pair<vertex*, vertex*>>> edges_for_threads(number_of_threads);
 
