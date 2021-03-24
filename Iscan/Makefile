@@ -1,4 +1,4 @@
 make:
-	g++ -g ../readgml/readgml.c main.cpp -o main
+	g++ -g -pthread ../readgml/readgml.c main.cpp -o main
 clean:
 	rm main intermediate.txt

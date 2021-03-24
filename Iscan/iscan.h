@@ -559,8 +559,8 @@ void iscan::updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>
 
 void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = false){
 //     inputGraph->printVertices();
-    if((id1+id2) == 16)
-        int a = 0;
+     if((id1+id2) == 19)
+         int a = 0;
     // cout<<"Before Update edge:"<<endl;
     // for(auto it:bfsTreeObject->phi)
     // {
@@ -598,8 +598,6 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
     }
     else
     {
-        epsilon_values.erase({inputGraph->vertexMap[id1], inputGraph->vertexMap[id2]});
-        epsilon_values.erase({inputGraph->vertexMap[id2], inputGraph->vertexMap[id1]});
         inputGraph->removeEdge(id1,id2);
     }
     // inputGraph->printGraph();
@@ -608,6 +606,12 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
         updateRuvSimilarityMultiThreaded(Ruv);
     else
         updateRuvSimilaritySingleThreaded(Ruv);
+
+    if(!isAdded)
+    {
+        epsilon_values.erase({inputGraph->vertexMap[id1], inputGraph->vertexMap[id2]});
+        epsilon_values.erase({inputGraph->vertexMap[id2], inputGraph->vertexMap[id1]});
+    }
     // cout<<"Similarity Values:"<<endl;
     // for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
     // {
