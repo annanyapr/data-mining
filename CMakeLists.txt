@@ -4,6 +4,7 @@ project(DataMining)
 set(CMAKE_CXX_STANDARD 17)
 set(GML ./readgml)
 include_directories(${GML})
+find_package (Threads)
 
 
 set(
@@ -13,3 +14,4 @@ set(
 
 )
 add_executable(Clion ${SOURCE_FILES})
+target_link_libraries(Clion PRIVATE Threads::Threads)

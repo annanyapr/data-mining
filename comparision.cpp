@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
                     incrementalTime2 += chrono::duration <double, milli> (diff).count();
                     
                     iscanG2->printClusters();
-                    iscanG->printClusters();
+                    // iscanG->printClusters();
                     cout<<"--------------------------------"<<endl;
 
                     // Checking if two clusters are same
@@ -451,7 +451,6 @@ void checkClusters(map<int,vector<vertex*>> s, map<int,vector<vertex*>>i)
 */
 
 
-
 /*
 Comparison matrices:
 
@@ -462,4 +461,11 @@ Comparison matrices:
 6. comparing on edge deletion
 7. comparing by changing epsilon values
 
+    1. Random deletion comparison between scan and iscan
+    2. Update cluster size to ensure correct size comparison while merging 
+    3. Update cluster checker
+    5. Run on real life data set
+    7. Maybe batch modification
+    8. Time comparison per iteration
+    9. Initial graph multithreading check
 */

@@ -49,20 +49,62 @@ int main(int argc, char* argv[])
             iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
             IS->executeSCAN(1);
             G->printClusters();
-            // cout<<"Vertices information"<<endl;
-            // G->printVertices();
 
             cout<<"Initial clustering done."<<endl;
-            cout<<"Number of edges to add/delete:"<<endl;
+            cout<<"Number of updates"<<endl;
+            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2"<<endl;
             
-            int numupdates, update, src, dest;
+            int numupdates, edge_vertex,update, src, dest, id;
             cin>>numupdates;
             for(int i=0;i<numupdates;i++)
             {
                 // Check if vertex exists or not and same for edge
-                cin>>update>>src>>dest;
-                IS->updateEdge(src, dest, update);   
-                // G->printVertices();
+                cin>>edge_vertex;
+                if(edge_vertex)
+                {
+                    // Vertex
+                    cin>>update>>id;
+                    if(update)
+                    {
+                        // Vertex delete
+                        // First check if vertex exists
+                        if(G->vertexMap.find(id)==G->vertexMap.end())
+                        {
+                            cout<<"Vertex not present in graph."<<endl;
+                            continue;
+                        }
+                        vector<vertex*> neighbours = G->graphObject[G->vertexMap[id]];
+                        for(auto it:neighbours)
+                        {
+                            // Removing all the edges corresponding to this vertex
+                            IS->updateEdge(id, it->ID, 0, 1);
+                        }
+                        G->graphObject.erase(G->vertexMap[id]);
+                        G->outliers.erase(remove(G->outliers.begin(), G->outliers.end(), G->vertexMap[id]), G->outliers.end());
+                        G->vertexMap.erase(id);
+
+                    }
+                    else
+                    {
+                        // Vertex add
+                        G->addVertex(id, "");
+                        G->outliers.push_back(G->vertexMap[id]);
+                        G->vertexMap[id]->hub_or_outlier = 1;
+                    }
+                }
+                else
+                {
+                    // Edge
+                    // First check if edge exists by checking if both vertices exist in graph or not
+                    if(G->vertexMap.find(src) == G->vertexMap.end() || G->vertexMap.find(dest) == G->vertexMap.end())
+                    {
+                        cout<<"Edge not present in graph."<<endl;
+                        continue;
+                    }
+                    cin>>update>>src>>dest;
+                    IS->updateEdge(src, dest, !update); 
+                }
+                  
             }
 
             G->printClusters();
@@ -117,30 +159,71 @@ int main(int argc, char* argv[])
             
             iscan *IS = new iscan(stof(argv[3]), stoi(argv[4]), G);
             IS->executeSCAN();
-            cout<<"SCAN Results:"<<endl;
             G->printClusters();
 
 
-            // cout<<"Vertices information"<<endl;
-            // G->printVertices();
-
             cout<<"Initial clustering done."<<endl;
-            cout<<"Number of edges to add/delete:"<<endl;
+            cout<<"Number of updates"<<endl;
+            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2"<<endl;
             
-            int numupdates, update, src, dest;
+            int numupdates, edge_vertex,update, src, dest, id;
             cin>>numupdates;
             for(int i=0;i<numupdates;i++)
             {
                 // Check if vertex exists or not and same for edge
-                cin>>update>>src>>dest;
-                IS->updateEdge(src, dest, update);   
-                // G->printVertices();
-            }
+                cin>>edge_vertex;
+                if(edge_vertex)
+                {
+                    // Vertex
+                    cin>>update>>id;
+                    if(update)
+                    {
+                        // Vertex delete
+                        // First check if vertex exists
+                        if(G->vertexMap.find(id)==G->vertexMap.end())
+                        {
+                            cout<<"Vertex not present in graph."<<endl;
+                            continue;
+                        }
+                        vector<vertex*> neighbours = G->graphObject[G->vertexMap[id]];
+                        for(auto it:neighbours)
+                        {
+                            // Removing all the edges corresponding to this vertex
+                            IS->updateEdge(id, it->ID, 0, 1);
+                        }
+                        G->graphObject.erase(G->vertexMap[id]);
+                        G->outliers.erase(remove(G->outliers.begin(), G->outliers.end(), G->vertexMap[id]), G->outliers.end());
+                        G->vertexMap.erase(id);
 
-            G->printClusters();
+                    }
+                    else
+                    {
+                        // Vertex add
+                        G->addVertex(id, "");
+                        G->outliers.push_back(G->vertexMap[id]);
+                        G->vertexMap[id]->hub_or_outlier = 1;
+                    }
+                }
+                else
+                {
+                    // Edge
+                    // First check if edge exists by checking if both vertices exist in graph or not
+                    if(G->vertexMap.find(src) == G->vertexMap.end() || G->vertexMap.find(dest) == G->vertexMap.end())
+                    {
+                        cout<<"Edge not present in graph."<<endl;
+                        continue;
+                    }
+                    cin>>update>>src>>dest;
+                    IS->updateEdge(src, dest, !update); 
+                }
+            }
+            G->printClusters();         
         }
+       
+    
     }
 
+    // TODO: add updates section in --LINK
     if(strcmp(argv[1], "--LINK") == 0)
     {
         ifstream F(argv[2]);
@@ -203,25 +286,67 @@ int main(int argc, char* argv[])
 
             // cout<<"Vertices information"<<endl;
             // G->printVertices();
-
-            // cout<<"Initial clustering done."<<endl;
-            // cout<<"Number of edges to add/delete:"<<endl;
+            cout<<"Initial clustering done."<<endl;
+            cout<<"Number of updates"<<endl;
+            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2"<<endl;
             
-            // int numupdates, update, src, dest;
-            // cin>>numupdates;
-            // for(int i=0;i<numupdates;i++)
-            // {
-            //     // Check if vertex exists or not and same for edge
-            //     cin>>update>>src>>dest;
-            //     IS->updateEdge(src, dest, update);   
-            //     // G->printVertices();
-            // }
+            int numupdates, edge_vertex,update, src, dest, id;
+            cin>>numupdates;
+            for(int i=0;i<numupdates;i++)
+            {
+                // Check if vertex exists or not and same for edge
+                cin>>edge_vertex;
+                if(edge_vertex)
+                {
+                    // Vertex
+                    cin>>update>>id;
+                    if(update)
+                    {
+                        // Vertex delete
+                        // First check if vertex exists
+                        if(G->vertexMap.find(id)==G->vertexMap.end())
+                        {
+                            cout<<"Vertex not present in graph."<<endl;
+                            continue;
+                        }
+                        vector<vertex*> neighbours = G->graphObject[G->vertexMap[id]];
+                        for(auto it:neighbours)
+                        {
+                            // Removing all the edges corresponding to this vertex
+                            IS->updateEdge(id, it->ID, 0, 1);
+                        }
+                        G->graphObject.erase(G->vertexMap[id]);
+                        G->outliers.erase(remove(G->outliers.begin(), G->outliers.end(), G->vertexMap[id]), G->outliers.end());
+                        G->vertexMap.erase(id);
 
-            // G->printClusters();
+                    }
+                    else
+                    {
+                        // Vertex add
+                        G->addVertex(id, "");
+                        G->outliers.push_back(G->vertexMap[id]);
+                        G->vertexMap[id]->hub_or_outlier = 1;
+                    }
+                }
+                else
+                {
+                    // Edge
+                    // First check if edge exists by checking if both vertices exist in graph or not
+                    if(G->vertexMap.find(src) == G->vertexMap.end() || G->vertexMap.find(dest) == G->vertexMap.end())
+                    {
+                        cout<<"Edge not present in graph."<<endl;
+                        continue;
+                    }
+                    cin>>update>>src>>dest;
+                    IS->updateEdge(src, dest, !update); 
+                }   
+            }
+            G->printClusters();
         }
     }
-}
+    
 
+}
 /*
     Dataset links:
         http://snap.stanford.edu/data/index.html
