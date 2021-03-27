@@ -87,6 +87,12 @@ int main(int argc, char* argv[])
                     else
                     {
                         // Vertex add
+                        // First check if vertex already exists -> don't add
+                        if(G->vertexMap.find(id)!=G->vertexMap.end())
+                        {
+                            cout<<"Vertex with id:"<<id<<" already exists."<<endl;
+                            continue;
+                        }
                         G->addVertex(id, "");
                         G->outliers.push_back(G->vertexMap[id]);
                         G->vertexMap[id]->hub_or_outlier = 1;
