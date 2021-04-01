@@ -4,8 +4,6 @@
 
 using namespace std;
 
-void checkClusters(map<int,vector<vertex*>> , map<int,vector<vertex*>>);
-
 int main(int argc, char* argv[])
 {
     // Input taken from GML 
@@ -45,16 +43,6 @@ int main(int argc, char* argv[])
 
             iscan *iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
             iscan *iscanObject2 = new iscan(stof(argv[3]), stoi(argv[4]), iscanG2);
-
-            // auto start = chrono::steady_clock::now();
-            // iscanObject->executeSCAN(true);
-            // auto end = chrono::steady_clock::now();
-
-            // auto start_2 = chrono::steady_clock::now();
-            // iscanObject2->executeSCAN();
-            // auto end_2 = chrono::steady_clock::now();
-            // cout<<"Initial Iscan clustering Done"<<endl;
-
 
             double incrementalTime = 0;
             double incrementalTime2 = 0;
@@ -118,15 +106,7 @@ int main(int argc, char* argv[])
                     incrementalTime2 += chrono::duration <double, milli> (diff).count();
                     
                     iscanG2->printClusters();
-                    // iscanG->printClusters();
-                    cout<<"--------------------------------"<<endl;
-
-                    // Checking if two clusters are same
-                    // map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
-                    // map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
-                    // map<int,vector<vertex*>> ISCANClusters2 = iscanG2->clusters;
-                    // checkClusters(SCANClusters, ISCANClusters);
-                    
+                    cout<<"--------------------------------"<<endl;                    
                 }
             }       
             cout<<"--------------------------------"<<endl;
@@ -134,9 +114,6 @@ int main(int argc, char* argv[])
             cout<<"SCAN Time:"<<scanTime<<endl;
             cout<<"Incremental SCAN Time with parallel threads:"<<incrementalTime<<endl;
             cout<<"Incremental SCAN Time without parallel threads:"<<incrementalTime2<<endl;
-            // cout<<"Initial SCAN Time with parallel threads: "<< chrono::duration <double, milli> (end-start).count() << endl; 
-            // cout<<"Initial SCAN Time without parallel threads: "<< chrono::duration <double, milli> (end_2-start_2).count() << endl; 
-
         }
     }
 
@@ -177,9 +154,6 @@ int main(int argc, char* argv[])
             iscan *iscanObject = new iscan(stof(argv[3]), stoi(argv[4]), iscanG);
             iscan *iscanObject2 = new iscan(stof(argv[3]), stoi(argv[4]), iscanG2);
 
-            // iscanObject->executeSCAN();
-            // cout<<"Initial Iscan clustering Done"<<endl;
-
             double incrementalTime = 0;
             double incrementalTime2 = 0;
             double scanTime = 0;
@@ -219,19 +193,13 @@ int main(int argc, char* argv[])
                         }
                         currentG->numofEdges = nEdges;
                                             
-                        // cout<<"Graph structure after adding edge"<<endl;
-                        // currentG->printGraph();cout<<endl;
-
                         iscan *scanObject = new iscan(stof(argv[3]), stoi(argv[4]), currentG);
-                        // cout<<"\n\nClustering by SCAN:"<<endl;
                         auto start = chrono::steady_clock::now();
                         scanObject->executeSCAN();
                         auto end = chrono::steady_clock::now();
                         auto diff = end - start;
                         scanTime += chrono::duration <double, milli> (diff).count();
-                        // currentG->printClusters();
                         
-                        // cout<<"\n\nIncremental Clustering by ISCAN:"<<endl;
                         /*MultiThread*/
                         start = chrono::steady_clock::now();
                         iscanObject->updateEdge(i, j, 1,true);
@@ -246,16 +214,6 @@ int main(int argc, char* argv[])
                         diff = end - start;
                         incrementalTime2 += chrono::duration <double, milli> (diff).count();
                         
-                        // iscanG2->printClusters();
-                        // iscanG->printClusters();
-
-                        // cout<<"--------------------------------"<<endl;
-
-                        // map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
-                        // map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
-                        // map<int,vector<vertex*>> ISCANClusters2 = iscanG2->clusters;
-                        // checkClusters(SCANClusters, ISCANClusters);
-
                     }
                 }
             }
@@ -334,26 +292,12 @@ int main(int argc, char* argv[])
             double incrementalTime2 = 0;
             double scanTime = 0;
 
-            // auto start = chrono::steady_clock::now();
             scanObject->executeSCAN();
-            // auto end = chrono::steady_clock::now();
-            // auto diff = end - start;
-            // scanTime += chrono::duration <double, milli> (diff).count();
 
             // /*MultiThread*/
-            // start = chrono::steady_clock::now();
             iscanObject->executeSCAN();
-            // end = chrono::steady_clock::now();
-            // diff = end - start;
-            // incrementalTime += chrono::duration <double, milli> (diff).count();
-            
             // /*Single Thread*/
-            // start = chrono::steady_clock::now();
             iscanObject2->executeSCAN(true);
-            // end = chrono::steady_clock::now();
-            // diff = end - start;
-            // incrementalTime2 += chrono::duration <double, milli> (diff).count();
-
             
             for(int k=0;k<updateEdgeNumber;k++)
             {
@@ -380,7 +324,6 @@ int main(int argc, char* argv[])
                 currentG->numofEdges = nedges+k+1;
                                     
                 iscan *tempScanObject = new iscan(stof(argv[3]), stoi(argv[4]), currentG);
-                // cout<<"\n\nClustering by SCAN:"<<endl;
                 auto start = chrono::steady_clock::now();
                 tempScanObject->executeSCAN();
                 auto end = chrono::steady_clock::now();
@@ -413,52 +356,5 @@ int main(int argc, char* argv[])
             cout<<"Incremental SCAN Time  with parallel threads:"<<incrementalTime2<<endl;
         }
     }
-
-}
-
-void checkClusters(map<int,vector<vertex*>> s, map<int,vector<vertex*>>i)
-{
-    bool val = true;
-    if(s.size()!=i.size()){val = false;}
-    for(auto it=s.begin(); it!=s.end();it++)
-    {
-        int minID = (it)->second[0]->ID;
-        int cID = -1;
-        for(auto it1:i)
-        {
-            for(auto it2:(it1).second)
-            {
-                if(minID == it2->ID)
-                {
-                    cID = it2->clusterId;
-                    break;
-                }
-            }
-        }
-
-        if(cID == -1){val = false;break;}
-        if(it->second.size() != i[cID].size()){val = false;}
-        for(auto it1:it->second)
-        {
-            bool temp = false;
-            for(auto it2:i[cID])
-            {
-                if(it1->ID == (it2)->ID)
-                {
-                    temp = true;
-                    break;
-                }
-            }
-            if(!temp)
-            {
-                val = false;
-                break;
-            }
-
-        }
-
-
-    }
-    assert(val);
 
 }

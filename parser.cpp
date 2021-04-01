@@ -23,8 +23,6 @@ int main(int argc, char* argv[])
         S.insert({min(a, b), max(a, b)});
     }
 
-
-
     string rawname = argv[2];
     ofstream MyFile(rawname);
 

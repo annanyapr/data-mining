@@ -187,7 +187,7 @@ bool graph::findEdge(int Id1,int Id2)
     return false;
 }
 
-// REmoving both v1->v2 and v2->v1
+// Removing both v1->v2 and v2->v1
 void graph::removeEdge(int Id1,int Id2)
 {
     if(findEdge(Id1,Id2))
@@ -218,7 +218,6 @@ void graph::removeEdge(int Id1,int Id2)
 
         graphObject[v2].erase(graphObject[v2].begin()+i);
 
-        // numofEdges--;
     }
 }
 

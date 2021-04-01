@@ -4,8 +4,6 @@
 
 using namespace std;
 
-void checkClusters(map<int,vector<vertex*>> , map<int,vector<vertex*>>);
-
 int main(int argc, char* argv[])
 {
     // Input taken from GML 
@@ -129,16 +127,10 @@ int main(int argc, char* argv[])
                         incrementalTime2 += chrono::duration <double, milli> (diff).count();
                         
                         iscanG->printClusters();
-                        // iscanG2->printGraph();
-                        // iscanG->printClusters();
                         cout<<"--------------------------------"<<endl;
 
-                        // Checking if two clusters are same
-                        map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
-                        map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
                         delete(currentG);
                         delete(scanObject);
-                        // checkClusters(SCANClusters, ISCANClusters);
                     }
                     
                     
@@ -283,14 +275,10 @@ int main(int argc, char* argv[])
                         diff = end - start;
                         incrementalTime2 += chrono::duration <double, milli> (diff).count();
                         iscanG2->printClusters();
-                        // iscanG->printGraph();
                         cout<<"--------------------------------"<<endl;
 
-                        map<int,vector<vertex*>> SCANClusters  = currentG->clusters;
-                        map<int,vector<vertex*>> ISCANClusters = iscanG->clusters;
                         delete(currentG);
                         delete(scanObject);
-                        // checkClusters(SCANClusters, ISCANClusters);
                     }
                         
 
@@ -305,52 +293,5 @@ int main(int argc, char* argv[])
 
         }
     }
-
-}
-
-void checkClusters(map<int,vector<vertex*>> s, map<int,vector<vertex*>>i)
-{
-    bool val = true;
-    if(s.size()!=i.size()){val = false;}
-    for(auto it=s.begin(); it!=s.end();it++)
-    {
-        int minID = (it)->second[0]->ID;
-        int cID = -1;
-        for(auto it1:i)
-        {
-            for(auto it2:(it1).second)
-            {
-                if(minID == it2->ID)
-                {
-                    cID = it2->clusterId;
-                    break;
-                }
-            }
-        }
-
-        if(cID == -1){val = false;break;}
-        if(it->second.size() != i[cID].size()){val = false;}
-        for(auto it1:it->second)
-        {
-            bool temp = false;
-            for(auto it2:i[cID])
-            {
-                if(it1->ID == (it2)->ID)
-                {
-                    temp = true;
-                    break;
-                }
-            }
-            if(!temp)
-            {
-                val = false;
-                break;
-            }
-
-        }
-
-
-    }
-    assert(val);
 
 }

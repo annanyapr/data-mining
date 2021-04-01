@@ -4,8 +4,6 @@
 
 using namespace std;
 
-void checkClusters(map<int,vector<vertex*>> , map<int,vector<vertex*>>);
-
 int main(int argc, char* argv[])
 {
     if(strcmp(argv[1], "--LINK") == 0)
@@ -77,25 +75,13 @@ int main(int argc, char* argv[])
             double incrementalTime2 = 0;
             double scanTime = 0;
 
-            // auto start = chrono::steady_clock::now();
             scanObject->executeSCAN();
-            // auto end = chrono::steady_clock::now();
-            // auto diff = end - start;
-            // scanTime += chrono::duration <double, milli> (diff).count();
 
             // /*MultiThread*/
-            // start = chrono::steady_clock::now();
             iscanObject->executeSCAN();
-            // end = chrono::steady_clock::now();
-            // diff = end - start;
-            // incrementalTime += chrono::duration <double, milli> (diff).count();
-            
+
             // /*Single Thread*/
-            // start = chrono::steady_clock::now();
             iscanObject2->executeSCAN(true);
-            // end = chrono::steady_clock::now();
-            // diff = end - start;
-            // incrementalTime2 += chrono::duration <double, milli> (diff).count();
 
             F.clear();
             F.seekg(0);
@@ -124,7 +110,6 @@ int main(int argc, char* argv[])
                 currentG->numofEdges = scanG->numofEdges;
                 
                 iscan *tempScanObject = new iscan(stof(argv[3]), stoi(argv[4]), currentG);
-                // cout<<"\n\nClustering by SCAN:"<<endl;
                 auto start = chrono::steady_clock::now();
                 tempScanObject->executeSCAN();
                 auto end = chrono::steady_clock::now();
@@ -157,52 +142,5 @@ int main(int argc, char* argv[])
             cout<<"Incremental SCAN Time  with parallel threads:"<<incrementalTime2<<endl;
         }
     }
-
-}
-
-void checkClusters(map<int,vector<vertex*>> s, map<int,vector<vertex*>>i)
-{
-    bool val = true;
-    if(s.size()!=i.size()){val = false;}
-    for(auto it=s.begin(); it!=s.end();it++)
-    {
-        int minID = (it)->second[0]->ID;
-        int cID = -1;
-        for(auto it1:i)
-        {
-            for(auto it2:(it1).second)
-            {
-                if(minID == it2->ID)
-                {
-                    cID = it2->clusterId;
-                    break;
-                }
-            }
-        }
-
-        if(cID == -1){val = false;break;}
-        if(it->second.size() != i[cID].size()){val = false;}
-        for(auto it1:it->second)
-        {
-            bool temp = false;
-            for(auto it2:i[cID])
-            {
-                if(it1->ID == (it2)->ID)
-                {
-                    temp = true;
-                    break;
-                }
-            }
-            if(!temp)
-            {
-                val = false;
-                break;
-            }
-
-        }
-
-
-    }
-    assert(val);
 
 }

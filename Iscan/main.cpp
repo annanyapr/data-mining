@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
             cout<<"Initial clustering done."<<endl;
             cout<<"Number of updates"<<endl;
-            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2"<<endl;
+            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2(Only when updating edge)"<<endl;
             
             int numupdates, edge_vertex,update, src, dest, id;
             cin>>numupdates;
@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 
             cout<<"Initial clustering done."<<endl;
             cout<<"Number of updates"<<endl;
-            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2"<<endl;
+            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2(Only when updating edge)"<<endl;
             
             int numupdates, edge_vertex,update, src, dest, id;
             cin>>numupdates;
@@ -229,7 +229,6 @@ int main(int argc, char* argv[])
     
     }
 
-    // TODO: add updates section in --LINK
     if(strcmp(argv[1], "--LINK") == 0)
     {
         ifstream F(argv[2]);
@@ -265,8 +264,6 @@ int main(int argc, char* argv[])
 
             }
 
-            // G->printGraph();
-
             
             if(stof(argv[3])>1 || stof(argv[3])<=0){cout<<"Epsilon value should be between 0 and 1"<<endl;exit(0);}
             if(stoi(argv[4])<=0){cout<<"Mu value should be greater than 0"<<endl;exit(0);}
@@ -287,14 +284,10 @@ int main(int argc, char* argv[])
             cout << "SCAN without multi threading " << chrono::duration <double, milli> (end - start).count() << endl;
             cout << "SCAN with multithreading" << chrono::duration <double, milli> (end2 - start2).count();
             cout << endl; 
-            // G->printClusters();
 
-
-            // cout<<"Vertices information"<<endl;
-            // G->printVertices();
             cout<<"Initial clustering done."<<endl;
             cout<<"Number of updates"<<endl;
-            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2"<<endl;
+            cout<<"Edge/vertex(0/1)  add/delete(0/1)  id1 id2(Only when updating edge)"<<endl;
             
             int numupdates, edge_vertex,update, src, dest, id;
             cin>>numupdates;
@@ -353,9 +346,3 @@ int main(int argc, char* argv[])
     
 
 }
-/*
-    Dataset links:
-        http://snap.stanford.edu/data/index.html
-        http://law.di.unimi.it/datasets.php
-
-*/

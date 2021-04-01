@@ -4,8 +4,6 @@
 
 using namespace std;
 
-void checkClusters(map<int,vector<vertex*>> , map<int,vector<vertex*>>);
-
 int main(int argc, char* argv[])
 {
     // Input taken from GML 
