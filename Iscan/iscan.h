@@ -30,20 +30,29 @@ public:
 
     // Number of threads
     int number_of_threads = 4;
+    
+    // Stores similarity values for each edge
+    unordered_map<pair<vertex*,vertex*>,float,hash_pair> epsilon_values;
 
-    // Constructor
+    // Constructor with epsilon, lambda and graph as parameters
     iscan(float, int, graph*);
+
+    // constructor with epsilon, lambda, graph and number of threads as parameters
     iscan(float, int, graph*, int);
 
-    // Calculates similarity between two vertices
+    // Returns similarity between two vertices from epsilon_values
     float getSimilarity(vertex*, vertex*);
+
+    // Calculates similarity between two vertices
     float calculateSimilarity(vertex*, vertex*);
 
+    // Update similarity of all edges in Ruv using single thread
     void updateRuvSimilaritySingleThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges);
     
+    // Update similarity of all edges in Ruv using multiple thread
     void updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>,hash_pair> edges);
     
-
+    // Util function to check if cycle present in BFS tree
     bool checkCycle();
 
     // Returns epsilon neighbourhood of a neighbourhood
@@ -52,11 +61,13 @@ public:
     // Checks if a vertex is core
     bool isCore(vertex*);
 
+    // Calculate similarity of all edges using single thread
     void calculateAllSimilaritySingleThreaded();
 
+    // Calculate similarity of all edges using multiple thread
     void calculateAllSimilarityMultiThreaded();
 
-    // Main clustering algorithm
+    // Executes SCAN for initial clustering
     void executeSCAN(bool multithreading);
 
     // Output formed cluster to intermediate file
@@ -65,18 +76,18 @@ public:
     // Output epsilon neighbourhood of all vertices in intermediate file
     void printEpsilonNeighbours(ofstream &);
 
+    // Returns Nuv for two vertices with ids id1 and id2 
     unordered_set<vertex*> getNuv(int Id1, int Id2);
 
-    unordered_map<pair<vertex*,vertex*>,float,hash_pair> epsilon_values;
-
+    // Returns Ruv for two vertices with ids id1 and id2 and set Nuv
     unordered_set<pair<vertex*,vertex*>,hash_pair> getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv);
 
+    // Main incremental function to update edge between a and b
     void updateEdge(int id1, int id2, bool isAdded, bool multithreading);
 
     void mergeCluster(vertex* w);
 
     void splitCluster(vertex* u, vertex* v2, unordered_set<vertex*>& old_cores);
-
 
     void printVector(vector<vertex*> neighbours);
     
@@ -91,6 +102,7 @@ iscan::iscan(float ep,int mu, graph* inputGraph)
     this->bfsTreeObject = new bfsTree();
 }
 
+// constructor
 iscan::iscan(float ep,int mu, graph* inputGraph, int number_of_threads)
 {
     this->epsilon = ep;
@@ -175,7 +187,7 @@ void iscan::calculateAllSimilaritySingleThreaded(){
     }
 }
 
-
+// Worker function to calculate similarities for all edges in thread
 void worker_func(unordered_map<pair<vertex *, vertex *>, float, hash_pair>& epsilon_values, vector<pair<vertex *, vertex *>>& edges, unordered_map<vertex *, vector<vertex *>>& graphObject){
     for(auto iter = edges.begin(); iter != edges.end(); iter++){
 
@@ -202,6 +214,7 @@ void worker_func(unordered_map<pair<vertex *, vertex *>, float, hash_pair>& epsi
 
 }
 
+// Distribute edges between threads and assign worker function to each of them
 void iscan::calculateAllSimilarityMultiThreaded(){
     vector<thread> threads;
     vector<vector<pair<vertex*, vertex*>>> edges_for_threads(number_of_threads);
@@ -224,7 +237,7 @@ void iscan::calculateAllSimilarityMultiThreaded(){
         threads.push_back(thread(worker_func, std::ref(epsilon_values), std::ref(edges_for_threads[i]), std::ref(inputGraph->graphObject)));
     }
 
-
+    // Wait for all the threads to finish their work
     for(int i = 0; i < number_of_threads; i++){
         threads[i].join();
     }
@@ -232,10 +245,7 @@ void iscan::calculateAllSimilarityMultiThreaded(){
 
 }
 
-
-
 // creates clustering and classifies non member vertices as hubs or outliers
-
 void iscan::executeSCAN(bool multithreading = false)
 {
     epsilon_values.clear();
@@ -430,6 +440,7 @@ void iscan::printEpsilonNeighbours(ofstream &outputFile)
 
 }
 
+// Returns the union of neighbours of v1 and v2
 unordered_set<vertex*> iscan::getNuv(int Id1, int Id2){
 
     vertex* v1 = inputGraph->vertexMap[Id1];
@@ -450,6 +461,7 @@ unordered_set<vertex*> iscan::getNuv(int Id1, int Id2){
     return s1;
 }
 
+// Returns edges with one vertex being v1/v2 and other in Nuv
 unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, unordered_set<vertex*> Nuv){
 
     vertex* v1 = inputGraph->vertexMap[Id1];
@@ -475,8 +487,11 @@ unordered_set<pair<vertex*,vertex*>,hash_pair> iscan::getRuv(int Id1, int Id2, u
             ret.insert({v2,*it});
         }
     }
+
+    // These are inserted twice
     ret.erase({v1, v2});
     ret.erase({v2, v1});
+
     ret.insert({v1,v2});
 
     return ret;
@@ -520,13 +535,14 @@ void iscan::updateRuvSimilarityMultiThreaded(unordered_set<pair<vertex*,vertex*>
 
 }
 
-
+// Main incremental algorithm
 void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = false){
 
     unordered_set<vertex*> Nuv = getNuv(id1,id2);
 
     map<pair<vertex*,vertex*>,float> sigmaOld;
     
+    // Store cores uptil now
     unordered_set<vertex*> old_cores;
 
     for(auto it: Nuv){
@@ -536,20 +552,21 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
         }
     }
 
-
+    // Store current similarities of edges in Ruv
     unordered_set<pair<vertex*,vertex*>,hash_pair> Ruv = getRuv(id1, id2, Nuv);
     for(auto it: Ruv)
     {
         sigmaOld[it] = getSimilarity(it.first,it.second);
     }
     
+    // If adding edge to graph
     if(isAdded)
     {
         inputGraph->addEdge(id1,id2);
-        // So that the size of container doesn't change
         epsilon_values[{inputGraph->vertexMap[id2], inputGraph->vertexMap[id1]}] = 0;
         epsilon_values[{inputGraph->vertexMap[id1], inputGraph->vertexMap[id2]}] = 0;
     }
+    // Removing edge from graph
     else
     {
         inputGraph->removeEdge(id1,id2);
@@ -566,6 +583,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
         epsilon_values.erase({inputGraph->vertexMap[id2], inputGraph->vertexMap[id1]});
     }
 
+    // Call mergeCluster for all cores in Nuv
     for(auto it:Nuv)
     {
         if(isCore(it))
@@ -574,6 +592,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
         }
     }
 
+    // Call splitCluster if similarity value goes below epsilon and was greater earlier
     for(auto it:Ruv)
     {
         if(sigmaOld[it]>= epsilon && getSimilarity(it.first,it.second)<epsilon)
@@ -587,7 +606,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
         iter->first->memberType = 1;
     }
 
-    // Reassigned Cluster Ids
+    // Run BFS across bfs tree to reassign Cluster Ids
     int tempId = 0;
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++){
         if(iter->first->clusterId == -1 && (iter->first->parent != NULL || !(iter->first->children.empty()))){
@@ -597,6 +616,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
         }
     }
 
+    // Change member types for all vertices which are part of clusters
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++){
         if(iter->first->clusterId != -1)
         {
@@ -608,6 +628,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
         }
     }
 
+    // Form clusters using assigned clusterids
     inputGraph->clusters.clear();
     inputGraph->clusters[-1] = vector<vertex*>();
     for(auto iter = inputGraph->graphObject.begin(); iter != inputGraph->graphObject.end(); iter++)
@@ -662,7 +683,6 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
     }
     for(auto it:temp)
     {
-        // Both have -1 as cluster ids and both are cores
         if((it.first)->clusterId == (it.second)->clusterId && (it.first)->clusterId == -1)
         {
             if(isCore(it.first) && isCore(it.second))
@@ -731,6 +751,7 @@ void iscan::updateEdge(int id1, int id2, bool isAdded, bool multithreading = fal
 
 }
 
+// MergeCluster algorithm as described in report
 void iscan::mergeCluster(vertex* w){
 
     if (w->memberType == 1|| w->memberType == -1){
@@ -789,6 +810,7 @@ void iscan::mergeCluster(vertex* w){
 
 }
 
+// SplitCluster algorithm as described in report
 void iscan::splitCluster(vertex* u, vertex* v, unordered_set<vertex*>& old_cores){
 
     if((u->memberType == 0) && (v->memberType == 0)){
@@ -844,6 +866,7 @@ void iscan::splitCluster(vertex* u, vertex* v, unordered_set<vertex*>& old_cores
 
 }
 
+// Util function to print a vector
 void iscan::printVector(vector<vertex*> n)
 {
     for(int i=0;i<n.size();i++)

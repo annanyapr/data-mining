@@ -15,8 +15,8 @@ class vertex
         int memberType=-1;   // 0 is core, 1 is Non Member, 2 is Non Core Member
         int clusterId = -1;  // cluster id
         int hub_or_outlier = -1; // hub is 0, outlier is 1
-        vertex * parent = NULL;
-        unordered_set<vertex*> children;
+        vertex * parent = NULL; // Parent of this vertex in BFS tree
+        unordered_set<vertex*> children;    // Children of this vertex in BFS tree
         vertex(int id, string nm);
 };
 

@@ -6,8 +6,10 @@ class bfsTree
 {
     public:
         
+        // Stores edges not part of bfs forest ; for edge a<->b only one of {a,b} or {b,a} is present
         unordered_set<pair<vertex*, vertex*>,hash_pair> phi;
 
+        // Stores edges part of bfs forest ; for edge a<->b only one of {a,b} or {b,a} is present
         unordered_set<pair<vertex*, vertex*>,hash_pair> bfsSet;
 
         void addEdgeToPhi(vertex* v1, vertex* v2);
@@ -22,23 +24,27 @@ class bfsTree
 
         int findInBfsSet(vertex* v1, vertex* v2);
 
+        // Merges two clusters of which v1 and v2 are part of 
         void merge(vertex* v1, vertex* v2);
 
+        // Recurse through the children of v
         void recurseChildren(vertex* v, int clusterId);
 
+        // Recurse through the parent of u and all its children
         void recurseParent(vertex* u, vertex* parent, int clusterId);
 
         void printBfsSet();
         
         void printPhiSet();
 
+        // Switch the parents from v to all the nodes till we reach the root
         void switchParents(vertex* v);
 
         bfsTree();
 };
 
 
-
+// Add edge only if {v1,v2} and {v2,v1} not alredy present in phi
 void bfsTree::addEdgeToPhi(vertex* v1, vertex* v2)
 {
     int temp = findInPhi(v1, v2);
@@ -65,6 +71,7 @@ bool bfsTree::removeEdgeFromPhi(vertex* v1, vertex* v2)
     else return false;
 }
 
+// Check for {v1,v2} and {v2,v1}
 int bfsTree::findInPhi(vertex* v1, vertex* v2)
 {
     if(phi.find({v1, v2})!=phi.end())
@@ -78,7 +85,7 @@ int bfsTree::findInPhi(vertex* v1, vertex* v2)
     return 2;
 }
 
-
+// Add edge only if {v1,v2} and {v2,v1} not alredy present in bfs
 void bfsTree::addEdgeToBfsSet(vertex* v1, vertex* v2)
 {
 
@@ -125,7 +132,7 @@ int bfsTree::findInBfsSet(vertex* v1, vertex* v2)
     return 2;
 }
 
-// v1 has smaller size of cluster
+// Merges two clusters where cluster having v1 has smaller size
 void bfsTree::merge(vertex* v1, vertex* v2)
 {
     removeEdgeFromPhi(v1, v2);
@@ -152,6 +159,7 @@ void bfsTree::switchParents(vertex* v){
     
 }
 
+// Change clusterid of current vertex v then run bfs on all its children
 void bfsTree::recurseChildren(vertex* v, int clusterId)
 {
     v->clusterId = clusterId;
@@ -174,6 +182,7 @@ void bfsTree::recurseChildren(vertex* v, int clusterId)
     }
 }
 
+// Change the clusterid of parent and recurse through all the children of parent except current vertex
 void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
 {
     if(parent == NULL)
@@ -184,6 +193,7 @@ void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
     for(auto it = parent->children.begin(); it!=parent->children.end();it++)
     {
         (*it)->clusterId = clusterId;
+        // Recurse only for other children not u
         if(*it != u){
             recurseChildren(*it, clusterId);
         }
@@ -192,11 +202,13 @@ void bfsTree::recurseParent(vertex* u, vertex* parent, int clusterId)
     recurseParent(parent, parent->parent, clusterId);
 }
 
+// Constructor
 bfsTree::bfsTree()
 {
     this->phi.clear();
 }
 
+// Util function to print the bfs set
 void bfsTree::printBfsSet(){
     cout<<"BFS Set\n";
     for( auto it:bfsSet)
@@ -206,6 +218,7 @@ void bfsTree::printBfsSet(){
     cout<<endl;
 }
 
+// Util function to print the phi set
 void bfsTree::printPhiSet(){
     cout<<"Phi Set\n";
     for( auto it:phi)

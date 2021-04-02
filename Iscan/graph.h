@@ -172,6 +172,7 @@ void graph::printGraph()
     }   
 }
 
+// Check if edge already present in graph or not
 bool graph::findEdge(int Id1,int Id2)
 {
     vertex* v1 = vertexMap[Id1];
